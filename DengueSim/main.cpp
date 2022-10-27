@@ -44,8 +44,8 @@ int main (void)
     
     double m = accumulate(std::begin(p), std::end(p), 0.0);
     m = m / p.size();
-    cout << m;
-    
+    cout << m << endl;
+    cout << "Changes to main." << endl;
   return 0;
 }
 
