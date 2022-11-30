@@ -13,7 +13,7 @@
 
 std::ostream &print(std::ostream &os, const Human &h){
     os << h.ID << " ";
-    print(os, *h.home);
+    print(os, h.home);
     os << " " << h.infected_days;
     return os;
 }
