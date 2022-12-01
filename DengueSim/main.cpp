@@ -9,60 +9,49 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "Human.h"
 #include "Location.h"
 
-#include <numeric> //needed for new Xcode version
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
+
 
 using namespace std;
-
-
-void LocationSetup(const int32_t n, vector<Location> *l) { //use pointer to locations to avoid copying
-    for(int32_t i=0; i<n; i++) l->emplace_back(i);
-}
-void HumanSetup(vector<Location> &l, vector<Human> *h, const int32_t n=6) {
-    //reference to location (will not be changed), pointer to humans (avoid copying)
-    int32_t id=0; //initialize human ID
-    for (auto &a : l) {//reference to individual location
-        for(int32_t i=0; i<n; i++) {
-            h->emplace_back(id,a,0); //add single human
-            id++; //increment human ID
-        }
-    }
-}
 
 int main(int argc, const char * argv[]) {
     vector<Location> L; //empty vector location
     vector<Human> H; //empty vector humans
+    int32_t nlocation=20000; //total number of locations
+    vector<int32_t> lcount(nlocation);
+    double p=0.5939354; //Reiner et al. (2014)
+    double n=9.01; //Reiner et al. (2014)
+    const long int rns=42; //random number seed
     
-    int32_t nlocation=20; //total number of locations
-
     LocationSetup(nlocation, &L); //set up locations (use pointer to avoid copying)
-    HumanSetup(L, &H, 3); //set up humans (use pointer to avoid copying)
- 
+    //HumanSetup(L, &H, 5); //set up humans, constant # of humans per location
+    HumanSetup(L, &H, p, n, rns); //set up humans, # of humans follows negative binomial distribution
+    
+    int32_t myhome;
     //for(auto &l:L) print(cout, l) << endl; //print locations
-    for(auto &h:H) print(cout, h) << endl; //print humans
+    for(auto &h:H) {
+        //print(cout, h) << endl; //print humans
+        myhome=h.GetLocation().GetLocationID();
+        //cout << myhome << endl;
+        lcount[myhome]++;
+    }
+   
+   //calculate mean # of humans per location
+   double m = accumulate(std::begin(lcount), std::end(lcount), 0.0);
+   m = m / lcount.size();
+   cout << m << endl;
+   
+    //calculate var # of humans per location
+   double sq_sum = std::inner_product(lcount.begin(), lcount.end(), lcount.begin(), 0.0);
+   double stdev = sq_sum / lcount.size() - m * m;
+   cout << stdev << endl;
 return 0;
     
 }
-
-    
-    /*std::default_random_engine generator;
-    std::poisson_distribution<int> distribution(4);
-    
-    vector<int> p;
-    for(int i=0; i<1000; i++) {
-        int number = distribution(generator);
-        p.push_back(number);
-    }
-    
-    double m = std::accumulate(std::begin(p), std::end(p), 0.0);
-    m = m / p.size();
-    cout << m;
-    */
 
 
 

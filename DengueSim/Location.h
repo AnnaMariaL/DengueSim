@@ -10,11 +10,16 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+
+using namespace std;
 
 class Human;
 class Location;
 
+
 extern std::ostream &print(std::ostream &os, const Location &l);
+extern void LocationSetup(const int32_t n, vector<Location> *l);
 
 class Location {
 friend std::ostream &print(std::ostream &os, const Location &l);
@@ -30,6 +35,9 @@ public:     //constructors
     Location(Location&&) noexcept = default;
     
     explicit Location(const int32_t i): ID(i) {};
+    
+    int32_t GetLocationID(void) const { return ID; }
+    
 private:
     int32_t ID;
 };

@@ -15,3 +15,8 @@ std::ostream &print(std::ostream &os, const Location &l)
     os << l.ID;
     return os;
 }
+
+void LocationSetup(const int32_t n, vector<Location> *l) { //use pointer to locations to avoid copying
+    for(int32_t i=0; i<n; i++) l->emplace_back(i);
+}
+
