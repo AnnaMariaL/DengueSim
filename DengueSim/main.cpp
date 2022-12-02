@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
-#include <map>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "Human.h"
 #include "Location.h"
@@ -19,36 +20,47 @@
 using namespace std;
 
 int main(int argc, const char * argv[]) {
-    vector<Location> L; //empty vector location
-    vector<Human> H; //empty vector humans
-    int32_t nlocation=20000; //total number of locations
-    vector<int32_t> lcount(nlocation);
-    double p=0.5939354; //Reiner et al. (2014)
-    double n=9.01; //Reiner et al. (2014)
-    const long int rns=42; //random number seed
+    vector<Location> vLocation; //empty vector location
+    vector<Human> vHuman; //empty vector humans
+    int32_t locationCount=200; //total number of locations
+    vector<int32_t> vHumanPerLocation(locationCount);
     
-    LocationSetup(nlocation, &L); //set up locations (use pointer to avoid copying)
-    //HumanSetup(L, &H, 5); //set up humans, constant # of humans per location
-    HumanSetup(L, &H, p, n, rns); //set up humans, # of humans follows negative binomial distribution
+    const double randomProbability=0.5939354; //Reiner et al. (2014)
+    const double randomSize=9.01; //Reiner et al. (2014)
+    const long int randomSeed=42; //random number seed
+    const gsl_rng_type * prandomNumberType; //build random number generator (GSL library)
+    gsl_rng * prandomNumberGenerator;
+    gsl_rng_env_setup();
+    prandomNumberType = gsl_rng_default;
+    prandomNumberGenerator = gsl_rng_alloc(prandomNumberType);
+    gsl_rng_set(prandomNumberGenerator, randomSeed);
     
-    int32_t myhome;
-    //for(auto &l:L) print(cout, l) << endl; //print locations
-    for(auto &h:H) {
-        //print(cout, h) << endl; //print humans
-        myhome=h.GetLocation().GetLocationID();
-        //cout << myhome << endl;
-        lcount[myhome]++;
+    generateLocations(locationCount, &vLocation); //set up locations (use pointer to avoid copying)
+    //generateHumans(vLocation, &vHuman, 5); //set up humans, constant # of humans per location
+    generateHumans(vLocation, &vHuman, randomProbability,randomSize,prandomNumberGenerator);
+    //generateHumans(vLocation, &vHuman, randomProbability, randomSize, prandomNumberGenerator); //set up humans, # of humans follows negative binomial distribution
+    
+    for(auto &rLocation:vLocation) print(cout, rLocation) << endl; //print locations
+    
+    int32_t myhomeID;
+    
+    for(auto &rHuman:vHuman) {
+        print(cout, rHuman) << endl; //print humans
+        myhomeID=rHuman.GetLocation().getLocationID();
+        vHumanPerLocation[myhomeID]++;
     }
    
    //calculate mean # of humans per location
-   double m = accumulate(std::begin(lcount), std::end(lcount), 0.0);
-   m = m / lcount.size();
-   cout << m << endl;
+   double mean = accumulate(std::begin(vHumanPerLocation), std::end(vHumanPerLocation), 0.0);
+   mean = mean / vHumanPerLocation.size();
+   cout << mean << endl;
    
     //calculate var # of humans per location
-   double sq_sum = std::inner_product(lcount.begin(), lcount.end(), lcount.begin(), 0.0);
-   double stdev = sq_sum / lcount.size() - m * m;
+   double sq_sum = std::inner_product(vHumanPerLocation.begin(), vHumanPerLocation.end(), vHumanPerLocation.begin(), 0.0);
+   double stdev = sq_sum / vHumanPerLocation.size() - mean * mean;
    cout << stdev << endl;
+    
+   gsl_rng_free(prandomNumberGenerator);
 return 0;
     
 }

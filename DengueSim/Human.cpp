@@ -9,44 +9,37 @@
 #include <stdio.h>
 #include "Human.h"
 #include "Location.h"
+
 using namespace std;
 
-void HumanSetup(vector<Location> &l, vector<Human> *h, const int32_t n) {
+void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const int32_t humanCount) {
     //reference to location (will not be changed), pointer to humans (avoid copying)
-    int32_t id=0; //initialize human ID
-    for (auto &a : l) {//reference to individual location
-        for(int32_t i=0; i<n; i++) {
-            h->emplace_back(id,a,0); //add single human
-            id++; //increment human ID
+    int32_t humanID=0; //initialize human ID
+    for (auto &rLocation : rLocations) {//reference to individual location
+        for(int32_t i=0; i<humanCount; i++) {
+            pHumans->emplace_back(humanID,rLocation,0); //add single human
+            humanID++; //increment human ID
         }
     }
 }
 
-void HumanSetup(vector<Location> &l, vector<Human> *h, const double p, const double n, const long int rns){
-    const gsl_rng_type * T;
-    gsl_rng * r;
-    unsigned int k;
-    int32_t id=0;
+void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const double randomProbability, const double randomSize, gsl_rng *prandomNumberGenerator){
+    unsigned int randomNumber;
+    int32_t humanID=0;
     
-    gsl_rng_env_setup();
-    T = gsl_rng_default;
-    r = gsl_rng_alloc(T);
-    gsl_rng_set(r, rns);
-    
-    for (auto &a : l) {//reference to individual location
-        k = gsl_ran_negative_binomial(r, p, n);
-        for(int32_t i=0; i<k; i++) {
-            h->emplace_back(id,a,0); //add single human
-            id++; //increment human ID
+    for (auto &rLocation : rLocations) {//reference to individual location
+        randomNumber = gsl_ran_negative_binomial(prandomNumberGenerator, randomProbability, randomSize);
+        for(int32_t i=0; i<randomNumber; i++) {
+            pHumans->emplace_back(humanID,rLocation,0); //add single human
+            humanID++; //increment human ID
         }
     }
-    gsl_rng_free(r);
 }
 
-std::ostream &print(std::ostream &os, const Human &h){
-    os << h.ID << " ";
-    print(os, h.home);
-    os << " " << h.infected_days;
+std::ostream &print(std::ostream &os, const Human &rHuman){
+    os << rHuman.ID << " ";
+    print(os, rHuman.rhomeLocation);
+    os << " " << rHuman.infectiousDays;
     return os;
 }
 

@@ -20,12 +20,14 @@ using namespace std;
 class Human;
 class Location;
 
-extern std::ostream &print(std::ostream &os, const Human &h);
-extern void HumanSetup(vector<Location> &l, vector<Human> *h, const int32_t n=6);
-extern void HumanSetup(vector<Location> &l, vector<Human> *h, const double p, const double n, const long int rns=2);
+extern std::ostream &print(std::ostream &os, const Human &rHuman);
+
+extern void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const int32_t humanCount=6);
+
+extern void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const double randomProbability, const double randomSize, gsl_rng *prandomNumberGenerator);
 
 class Human {
-friend std::ostream &print(std::ostream &os, const Human &h);
+friend std::ostream &print(std::ostream &os, const Human &rHuman);
 
 public:     //constructors
     //decativate copy constructor: Human h(h12);
@@ -37,17 +39,17 @@ public:     //constructors
     //default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer 
     Human(Human&&) noexcept = default;
     
-    Human(const int32_t p_i, Location &p_home, unsigned p_d): ID(p_i), home(p_home), infected_days(p_d) {}
-    Human(const int32_t p_i, Location &p_home): Human(p_i,p_home,0) {}
+    Human(const int32_t humanID, Location &rhomeLocation, unsigned infectiousDays): ID(humanID), rhomeLocation(rhomeLocation), infectiousDays(infectiousDays) {}
+    Human(const int32_t humanID, Location &rhomeLocation): Human(humanID,rhomeLocation,0) {}
     //std::vector<Location>& move(const std::vector<Location> &L);
     //void MoveAround(std::vector<Location> &allLocations); //infection happens here
     
-    Location &GetLocation(void) const { return home; }
+    Location &GetLocation(void) const { return rhomeLocation; }
     
 private:
     int32_t ID;
-    Location &home; //reference, because home is not changing & must not be a null ptr. 
-    unsigned infected_days=0;
+    Location &rhomeLocation; //reference, because home is not changing & must not be a null ptr.
+    unsigned infectiousDays=0;
 };
 
 #endif /* Human_h */

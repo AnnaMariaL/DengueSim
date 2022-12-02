@@ -18,11 +18,11 @@ class Human;
 class Location;
 
 
-extern std::ostream &print(std::ostream &os, const Location &l);
-extern void LocationSetup(const int32_t n, vector<Location> *l);
+extern std::ostream &print(std::ostream &os, const Location &rLocation);
+extern void generateLocations(const int32_t locationCount, vector<Location> *pLocations);
 
 class Location {
-friend std::ostream &print(std::ostream &os, const Location &l);
+friend std::ostream &print(std::ostream &os, const Location &rLocation);
     
 public:     //constructors
     //deactivate copy contructor: Location l(l2);
@@ -36,7 +36,7 @@ public:     //constructors
     
     explicit Location(const int32_t i): ID(i) {};
     
-    int32_t GetLocationID(void) const { return ID; }
+    int32_t getLocationID(void) const { return ID; }
     
 private:
     int32_t ID;
