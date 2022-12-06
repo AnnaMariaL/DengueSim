@@ -12,7 +12,7 @@
 
 std::ostream &print(std::ostream &os, const Location &rLocation)
 {
-    os << rLocation.ID;
+    os << rLocation.getLocationID() << " " <<  rLocation.getVisits();
     return os;
 }
 

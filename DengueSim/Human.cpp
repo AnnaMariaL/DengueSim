@@ -36,10 +36,25 @@ void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const 
     }
 }
 
+void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu) {
+    unsigned int randomNumber;
+    unsigned int visitIndex=0;
+    randomNumber = gsl_ran_poisson(prandomNumberGenerator, mu); //determine total number of visited locations
+    
+    while (visitIndex<randomNumber) { //while locations to visit
+        double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, pLocations->size()-1); //sample location
+        int32_t LocationIndex = round(randomUniform);
+        if ((*pLocations)[LocationIndex].getLocationID()!=rhomeLocation.getLocationID()) { //if not home location
+            visitIndex++; //increment
+            (*pLocations)[LocationIndex].registerVisit(*this); //register visit in location
+        }
+    }
+    rhomeLocation.registerVisit(*this); //always increment home Location
+};
+
 std::ostream &print(std::ostream &os, const Human &rHuman){
     os << rHuman.ID << " ";
-    print(os, rHuman.rhomeLocation);
-    os << " " << rHuman.infectiousDays;
+    os << rHuman.rhomeLocation.getLocationID() << " ";
+    os << rHuman.infectiousDays;
     return os;
 }
-

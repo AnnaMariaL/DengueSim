@@ -44,8 +44,10 @@ public:     //constructors
     //std::vector<Location>& move(const std::vector<Location> &L);
     //void MoveAround(std::vector<Location> &allLocations); //infection happens here
     
-    Location &GetLocation(void) const { return rhomeLocation; }
+    Location &GetHomeLocation(void) const { return rhomeLocation; }
     
+    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu=2.0);
+
 private:
     int32_t ID;
     Location &rhomeLocation; //reference, because home is not changing & must not be a null ptr.

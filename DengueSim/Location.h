@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <deque>
 
 using namespace std;
 
@@ -34,12 +35,17 @@ public:     //constructors
     // default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer
     Location(Location&&) noexcept = default;
     
-    explicit Location(const int32_t i): ID(i) {};
+    explicit Location(const int32_t i): ID(i), visits(0) {};
     
     int32_t getLocationID(void) const { return ID; }
+    int32_t getVisits(void) const { return visits; }
+    void registerVisit(Human &visitor) {visits++; }
+    void resetVisits(void) {visits=0;}
     
 private:
     int32_t ID;
+    int32_t visits;
+    std::deque<int32_t> visitHistory;
 };
 
 
