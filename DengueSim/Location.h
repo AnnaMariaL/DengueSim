@@ -35,17 +35,29 @@ public:     //constructors
     // default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer
     Location(Location&&) noexcept = default;
     
-    explicit Location(const int32_t i): ID(i), visits(0) {};
-    
+    explicit Location(const int32_t i, const int32_t HistoryLength=10): ID(i), Currentvisits(0), HistoryLength(HistoryLength), CurrentRiskScore(0) {};
     int32_t getLocationID(void) const { return ID; }
-    int32_t getVisits(void) const { return visits; }
-    void registerVisit(Human &visitor) {visits++; }
-    void resetVisits(void) {visits=0;}
+    int32_t getCurrentVisits(void) const { return Currentvisits; }
+    deque<int32_t>::size_type getHistoryLength(void) const {return VisitHistory.size(); }
+    double getCurrentRiskScore(void) const {return CurrentRiskScore;}
+    void updateInfectionRisk();
     
+    void registerVisit(Human &visitor);
+    void calculateCurrentRiskScore(void);
+    
+    void storeCurrentVisits(void);
+    void resetCurrentVisits(void) {Currentvisits=0;};
+    void storeCurrentRiskScore(void);
+    
+    void printRiskScoreHistory(void);
+    void printVisitHistory(void);
 private:
     int32_t ID;
-    int32_t visits;
-    std::deque<int32_t> visitHistory;
+    int32_t Currentvisits; //number of infectious visitors in current tick
+    double CurrentRiskScore;
+    int32_t HistoryLength; //length of the visitor history that should be tracked per location
+    deque<int32_t> VisitHistory; //visitor history for <HistoryLength> ticks
+    deque<double> RiskScoreHistory;
 };
 
 

@@ -39,19 +39,22 @@ public:     //constructors
     //default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer 
     Human(Human&&) noexcept = default;
     
-    Human(const int32_t humanID, Location &rhomeLocation, unsigned infectiousDays): ID(humanID), rhomeLocation(rhomeLocation), infectiousDays(infectiousDays) {}
+    Human(const int32_t humanID, Location &rhomeLocation, unsigned int infectiousDays): ID(humanID), rhomeLocation(rhomeLocation), infectiousDays(infectiousDays) {}
     Human(const int32_t humanID, Location &rhomeLocation): Human(humanID,rhomeLocation,0) {}
-    //std::vector<Location>& move(const std::vector<Location> &L);
     //void MoveAround(std::vector<Location> &allLocations); //infection happens here
     
     Location &GetHomeLocation(void) const { return rhomeLocation; }
     
     void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu=2.0);
-
+    void initiateInfection();
+    void propagateInfection(unsigned int InfectionDuration);
+    unsigned int getInfectiousDays() {return infectiousDays;}
+    
 private:
     int32_t ID;
     Location &rhomeLocation; //reference, because home is not changing & must not be a null ptr.
-    unsigned infectiousDays=0;
+    unsigned int infectiousDays=0;
+    unsigned int exposedDays=0; //state-of-the-art: serves Tto tag individuals that are infectious in next tick
 };
 
 #endif /* Human_h */

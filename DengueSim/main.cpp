@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -22,8 +23,8 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     vector<Location> vLocation; //empty vector location
     vector<Human> vHuman; //empty vector humans
-    int32_t locationCount=100; //total number of locations
-    int NumberTicks=2;
+    int32_t locationCount=200; //total number of locations
+    int NumberTicks=600; //total number of simulated ticks
     
     const double randomProbability=0.5939354; //Reiner et al. (2014)
     const double randomSize=9.01; //Reiner et al. (2014)
@@ -36,36 +37,46 @@ int main(int argc, const char * argv[]) {
     gsl_rng_set(prandomNumberGenerator, randomSeed);
     
     generateLocations(locationCount, &vLocation); //set up locations (use pointer to avoid copying)
-    //generateHumans(vLocation, &vHuman, 1); //set up humans, constant # of humans per location
+    //generateHumans(vLocation, &vHuman, 5); //set up humans, constant # of humans per location
     generateHumans(vLocation, &vHuman, randomProbability,randomSize,prandomNumberGenerator);//set up humans, # of humans follows negative binomial distribution
+
     
-//    for(auto &rLocation:vLocation) {
-//        print(cout, rLocation) << endl; //print locations
-//    }
-    
-    int32_t myhomeID;
-    for (int currentTick=0; currentTick<NumberTicks; currentTick++) {//for each tick
-        cout << "Tick: " << currentTick << endl;
-        for(auto &rHuman:vHuman) { //for each human
-            rHuman.generateMovement(&vLocation,prandomNumberGenerator);
-        }
-        for(auto &rLocation:vLocation)
-        {
-            print(cout, rLocation) << endl; //print locations
-            rLocation.resetVisits(); //reset counter
-        }
-        cout << "#########" << endl;
+    double infectionSeed = gsl_ran_flat(prandomNumberGenerator, 0, vHuman.size()); //seed infection
+    int32_t infectionID = int32_t(infectionSeed);
+    vHuman[infectionID].initiateInfection();
+    ofstream myfile;
+    myfile.open("output.txt");
+    if(!myfile.is_open()) {
+        cerr << "Can not open file";
+        return -1;
     }
     
-   gsl_rng_free(prandomNumberGenerator);
+    for (int currentTick=0; currentTick<NumberTicks; currentTick++) {//for each tick
+        for(auto &rHuman:vHuman) rHuman.generateMovement(&vLocation,prandomNumberGenerator,1); //generate movement
+        for(auto &rLocation:vLocation) rLocation.updateInfectionRisk(); //update infection risks
+        for(auto &rHuman:vHuman) rHuman.propagateInfection(10); //update infection status
+        
+        auto InfectiousCount = count_if(vHuman.begin(), vHuman.end(), [](Human &rHuman) {return rHuman.getInfectiousDays()>0;}); //generate output
+        auto SusceptibleCount = vHuman.size()-InfectiousCount;
+        myfile << currentTick << "\t" << InfectiousCount << "\t" << SusceptibleCount << endl;
+    }
+    myfile.close();
+    gsl_rng_free(prandomNumberGenerator);
 return 0;
     
 }
 
 //GRAVEYARD
+
+//    for(auto &rLocation:vLocation) {
+//        print(cout, rLocation) << endl; //print locations
+//    }
+
+
 //vector<int32_t> vHumanPerLocation(locationCount);
-// vHumanPerLocation[myhomeID]++;
+//vHumanPerLocation[myhomeID]++;
 //print(cout, rHuman) << endl; //print humans
+//int32_t myhomeID;
 //myhomeID=rHuman.GetHomeLocation().getLocationID(); //get homeID
 
 //calculate mean # of humans per location

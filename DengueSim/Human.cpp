@@ -42,19 +42,45 @@ void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumbe
     randomNumber = gsl_ran_poisson(prandomNumberGenerator, mu); //determine total number of visited locations
     
     while (visitIndex<randomNumber) { //while locations to visit
-        double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, pLocations->size()-1); //sample location
-        int32_t LocationIndex = round(randomUniform);
+        double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, pLocations->size()); //sample location
+        int32_t LocationIndex = int32_t(randomUniform);
         if ((*pLocations)[LocationIndex].getLocationID()!=rhomeLocation.getLocationID()) { //if not home location
             visitIndex++; //increment
             (*pLocations)[LocationIndex].registerVisit(*this); //register visit in location
+            if(infectiousDays==0){ //infection of susceptibles
+                double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, 1);
+                if(randomUniform<(*pLocations)[LocationIndex].getCurrentRiskScore()) {
+                    exposedDays=1;
+                }
+            }
         }
     }
-    rhomeLocation.registerVisit(*this); //always increment home Location
-};
+    
+    rhomeLocation.registerVisit(*this);//always increment home Location
+        if(infectiousDays==0) {
+            double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, 1);
+            if(randomUniform<rhomeLocation.getCurrentRiskScore()) {
+                exposedDays=1;
+            }
+        }
+}
+
+void Human::initiateInfection(){
+    exposedDays=1;
+}
+
+void Human::propagateInfection(unsigned int InfectionDuration){
+    if (exposedDays==0 & infectiousDays>0) infectiousDays=infectiousDays-1; //decrement infectious period
+    if (exposedDays>0 & infectiousDays==0) {
+        infectiousDays=InfectionDuration; //new infections
+        exposedDays=0;
+    }
+}
 
 std::ostream &print(std::ostream &os, const Human &rHuman){
     os << rHuman.ID << " ";
     os << rHuman.rhomeLocation.getLocationID() << " ";
-    os << rHuman.infectiousDays;
+    os << rHuman.infectiousDays << " ";
+    os << rHuman.exposedDays;
     return os;
 }
