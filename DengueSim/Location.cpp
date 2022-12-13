@@ -19,30 +19,24 @@ std::ostream &print(std::ostream &os, const Location &rLocation)
 }
 
 void generateLocations(const int32_t locationCount, vector<Location> *pLocations) { //use pointer to locations to avoid copying
-    for(int32_t i=0; i<locationCount; i++) pLocations->emplace_back(i);
+    for(int32_t i=0; i<locationCount; i++)
+        pLocations->emplace_back(i);
 }
 
 void Location::registerVisit(Human &visitor) {
     if(visitor.getInfectiousDays()>0) Currentvisits++; //count infectious visits
 }
 
-void Location::updateInfectionRisk() { //calculate new risk score, add to deque, and reset visit counter
-    calculateCurrentRiskScore();
-    storeCurrentVisits();
-    storeCurrentRiskScore();
-}
-
-void Location::storeCurrentVisits(){
-    VisitHistory.push_front(Currentvisits); //store number of visits
-    if(VisitHistory.size()>HistoryLength) VisitHistory.resize(HistoryLength); //resize deque if necessary
-    resetCurrentVisits(); //reset counter CurrentVisits to 0
+void Location::updateRiskScore(void) { //calculate new risk score, add to deque, and reset visit counter
+    CurrentRiskScore = 1-pow(0.99, Currentvisits); //calculate current risk score
     
-}
-
-void Location::storeCurrentRiskScore(){
-    RiskScoreHistory.push_front(CurrentRiskScore); //store
-    if(RiskScoreHistory.size()>HistoryLength) //resize if necessary
-        RiskScoreHistory.resize(HistoryLength);
+    VisitHistory.push_front(Currentvisits); //store number of current visits into deque
+    RiskScoreHistory.push_front(CurrentRiskScore); //store current risk score into deque
+    
+    if(VisitHistory.size()>HistoryLength) VisitHistory.resize(HistoryLength); //resize deque if necessary
+    if(RiskScoreHistory.size()>HistoryLength) RiskScoreHistory.resize(HistoryLength); //resize deque if necessary
+    
+    Currentvisits=0; //reset the number of currentvisits
 }
 
 void Location::printRiskScoreHistory(){
@@ -61,8 +55,4 @@ void Location::printVisitHistory(){
     } else {
         cout << "Empty VisitHistory." << endl;
     }
-}
-
-void Location::calculateCurrentRiskScore() {
-    CurrentRiskScore = 1-pow(0.99, Currentvisits);
 }

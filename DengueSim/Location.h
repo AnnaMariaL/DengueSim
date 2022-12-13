@@ -40,15 +40,9 @@ public:     //constructors
     int32_t getCurrentVisits(void) const { return Currentvisits; }
     deque<int32_t>::size_type getHistoryLength(void) const {return VisitHistory.size(); }
     double getCurrentRiskScore(void) const {return CurrentRiskScore;}
-    void updateInfectionRisk();
-    
+    void updateRiskScore(void);
     void registerVisit(Human &visitor);
-    void calculateCurrentRiskScore(void);
-    
-    void storeCurrentVisits(void);
-    void resetCurrentVisits(void) {Currentvisits=0;};
-    void storeCurrentRiskScore(void);
-    
+
     void printRiskScoreHistory(void);
     void printVisitHistory(void);
 private:

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "Human.h"
 #include "Location.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -24,12 +25,12 @@ void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const 
 }
 
 void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const double randomProbability, const double randomSize, gsl_rng *prandomNumberGenerator){
-    unsigned int randomNumber;
+    unsigned int InhabitantsPerLocation;
     int32_t humanID=0;
     
     for (auto &rLocation : rLocations) {//reference to individual location
-        randomNumber = gsl_ran_negative_binomial(prandomNumberGenerator, randomProbability, randomSize);
-        for(int32_t i=0; i<randomNumber; i++) {
+        InhabitantsPerLocation = gsl_ran_negative_binomial(prandomNumberGenerator, randomProbability, randomSize);
+        for(int32_t i=0; i<InhabitantsPerLocation; i++) {
             pHumans->emplace_back(humanID,rLocation,0); //add single human
             humanID++; //increment human ID
         }
@@ -37,32 +38,34 @@ void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const 
 }
 
 void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu) {
-    unsigned int randomNumber;
-    unsigned int visitIndex=0;
-    randomNumber = gsl_ran_poisson(prandomNumberGenerator, mu); //determine total number of visited locations
+    unsigned int NumberOfLocationVisited;
+    NumberOfLocationVisited = gsl_ran_poisson(prandomNumberGenerator, mu); //determine total number of visited locations
     
-    while (visitIndex<randomNumber) { //while locations to visit
-        double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, pLocations->size()); //sample location
-        int32_t LocationIndex = int32_t(randomUniform);
-        if ((*pLocations)[LocationIndex].getLocationID()!=rhomeLocation.getLocationID()) { //if not home location
-            visitIndex++; //increment
-            (*pLocations)[LocationIndex].registerVisit(*this); //register visit in location
-            if(infectiousDays==0){ //infection of susceptibles
-                double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, 1);
-                if(randomUniform<(*pLocations)[LocationIndex].getCurrentRiskScore()) {
-                    exposedDays=1;
-                }
-            }
+    vector<int32_t> LocationsVisited;
+    int32_t VisitIndex=0;
+    
+    while (VisitIndex<NumberOfLocationVisited) {
+        auto LocationIndex = gsl_rng_uniform_int(prandomNumberGenerator, pLocations->size());
+        auto AlreadySampled = find(LocationsVisited.begin(), LocationsVisited.end(), LocationIndex);
+        
+        if((AlreadySampled==end(LocationsVisited)) & (LocationIndex != GetHomeLocation().getLocationID())) {
+            LocationsVisited.emplace_back(LocationIndex);
+            VisitIndex++;
         }
     }
+    LocationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
     
-    rhomeLocation.registerVisit(*this);//always increment home Location
-        if(infectiousDays==0) {
-            double randomUniform = gsl_ran_flat(prandomNumberGenerator, 0, 1);
-            if(randomUniform<rhomeLocation.getCurrentRiskScore()) {
+    for (int i=0; i<LocationsVisited.size(); i++) {
+        int32_t LocationIndex = LocationsVisited[i];
+        (*pLocations)[LocationIndex].registerVisit(*this); //register visit
+        
+        if(infectiousDays==0) { //register potential exposure
+            double InfectionProbability = gsl_ran_flat(prandomNumberGenerator, 0, 1);
+            if(InfectionProbability<(*pLocations)[LocationIndex].getCurrentRiskScore()) {
                 exposedDays=1;
             }
         }
+    }
 }
 
 void Human::initiateInfection(){

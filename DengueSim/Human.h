@@ -44,11 +44,11 @@ public:     //constructors
     //void MoveAround(std::vector<Location> &allLocations); //infection happens here
     
     Location &GetHomeLocation(void) const { return rhomeLocation; }
+    unsigned int getInfectiousDays() {return infectiousDays;}
     
     void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu=2.0);
     void initiateInfection();
     void propagateInfection(unsigned int InfectionDuration);
-    unsigned int getInfectiousDays() {return infectiousDays;}
     
 private:
     int32_t ID;
