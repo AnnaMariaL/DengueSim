@@ -143,6 +143,6 @@ xcuserdata/**/*
 *.moved-aside
 
 #additional .gitignores (AML, 2023-01-14; manage untracked files)
-../DengueSim.xcodeproj/project.xcworkspace/xcuserdata/
-../DengueSim.xcodeproj/xcuserdata/
+DengueSim.xcodeproj/project.xcworkspace/xcuserdata/
+DengueSim.xcodeproj/xcuserdata/
 
