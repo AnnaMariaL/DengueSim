@@ -39,22 +39,23 @@ public:     //constructors
     //default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer 
     Human(Human&&) noexcept = default;
     
-    Human(const int32_t humanID, Location &rhomeLocation, unsigned int infectiousDays): ID(humanID), rhomeLocation(rhomeLocation), infectiousDays(infectiousDays) {}
-    Human(const int32_t humanID, Location &rhomeLocation): Human(humanID,rhomeLocation,0) {}
+    Human(const int32_t humanID, Location &rhomeLocation, unsigned int InfectionStatus, unsigned int NTicksInStatus): ID(humanID), rhomeLocation(rhomeLocation), InfectionStatus(InfectionStatus), NTicksInStatus(NTicksInStatus){}
+    Human(const int32_t humanID, Location &rhomeLocation): Human(humanID,rhomeLocation,0,0) {}
     //void MoveAround(std::vector<Location> &allLocations); //infection happens here
     
     Location &GetHomeLocation(void) const { return rhomeLocation; }
-    unsigned int getInfectiousDays() {return infectiousDays;}
+    unsigned int getInfectionStatus() {return InfectionStatus;}
+    unsigned int getNTicksInStatus() {return NTicksInStatus;}
     
-    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu=2.0);
-    void initiateInfection();
+    void initiateInfection(unsigned int ExposedDuration);
+    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu=2.0, unsigned int ExposedDuration=1);
     void propagateInfection(unsigned int InfectionDuration);
     
 private:
     int32_t ID;
     Location &rhomeLocation; //reference, because home is not changing & must not be a null ptr.
-    unsigned int infectiousDays=0;
-    unsigned int exposedDays=0; //state-of-the-art: serves Tto tag individuals that are infectious in next tick
+    unsigned int InfectionStatus=0; //0 = susceptible, 1 = exposed, 2 = infected, 3 = recovered
+    unsigned int NTicksInStatus=0; //remaining ticks in status (i.e., 5 remaining infectious ticks), non-informative for susceptible class
 };
 
 #endif /* Human_h */

@@ -24,11 +24,11 @@ void generateLocations(const int32_t locationCount, vector<Location> *pLocations
 }
 
 void Location::registerVisit(Human &visitor) {
-    if(visitor.getInfectiousDays()>0) Currentvisits++; //count infectious visits
+    if((visitor.getInfectionStatus()==2) & (visitor.getNTicksInStatus()>0)) Currentvisits++; //count infectious visits
 }
 
 void Location::updateRiskScore(void) { //calculate new risk score, add to deque, and reset visit counter
-    CurrentRiskScore = 1-pow(0.99, Currentvisits); //calculate current risk score
+    CurrentRiskScore = 1-pow(0.97, Currentvisits); //calculate current risk score
     
     VisitHistory.push_front(Currentvisits); //store number of current visits into deque
     RiskScoreHistory.push_front(CurrentRiskScore); //store current risk score into deque
