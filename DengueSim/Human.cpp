@@ -42,7 +42,7 @@ void Human::initiateInfection(unsigned int ExposedDuration){
     NTicksInStatus=ExposedDuration;
 }
 
-void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu, unsigned int ExposedDuration) {
+void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu, unsigned int ExposedDuration, float DiseaseEstablishment) {
     unsigned int NumberOfLocationVisited;
     NumberOfLocationVisited = gsl_ran_poisson(prandomNumberGenerator, mu); //determine total number of visited locations
     
@@ -75,24 +75,36 @@ void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumbe
             VisitIndex++;
         }
     }
-    
-    LocationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
+LocationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
     
     for (int i=0; i<LocationsVisited.size(); i++) {
         int32_t LocationIndex = LocationsVisited[i];
         (*pLocations)[LocationIndex].registerVisit(*this); //register visit
         
         if(InfectionStatus==0) { //register potential exposure of susceptibles
-            double InfectionProbability = gsl_ran_flat(prandomNumberGenerator, 0, 1);
-            if(InfectionProbability<(*pLocations)[LocationIndex].getCurrentRiskScore()) {
-                initiateInfection(ExposedDuration);
+            int InfectiousVisits = (*pLocations)[LocationIndex].getCurrentRiskScore();
+            
+            for (int j=0; j<InfectiousVisits; j++) {
+                double InfectionProbability = gsl_ran_flat(prandomNumberGenerator, 0 , 1);
+                if (InfectionProbability<DiseaseEstablishment) initiateInfection(ExposedDuration);
             }
+            //double InfectionProbability = gsl_ran_flat(prandomNumberGenerator, 0, 1);
+            //if(InfectionProbability<(*pLocations)[LocationIndex].getCurrentRiskScore()) {
+              //  initiateInfection(ExposedDuration);
+            //}
         }
     }
 }
 
-void Human::propagateInfection(unsigned int InfectionDuration){
-    if ((InfectionStatus > 0) & (InfectionStatus < 3) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed/infectious period
+void Human::propagateInfection(unsigned int InfectionDuration, gsl_rng *prandomNumberGenerator){
+    float RecoveryRate = 1/float(InfectionDuration);
+    //if ((InfectionStatus > 0) & (InfectionStatus < 3) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed/infectious period
+    if ((InfectionStatus==1) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed period
+    
+    if (InfectionStatus==2) { //rate-based recovery
+        auto RecoveryProbability = gsl_ran_flat(prandomNumberGenerator, 0, 1);
+        if (RecoveryProbability<RecoveryRate) NTicksInStatus=0;
+    }
     if (InfectionStatus == 3) NTicksInStatus++; //increment recovered period (assuming lifelong immunity)
     
     if ((InfectionStatus==1) & (NTicksInStatus==0)) { //exposed --> infectious

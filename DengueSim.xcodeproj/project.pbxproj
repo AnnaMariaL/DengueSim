@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9569AD1329A693B500122B73 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9569AD1229A693B500122B73 /* Accelerate.framework */; };
 		958C79F2290AD91400E06D57 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 958C79F1290AD91400E06D57 /* main.cpp */; };
 		958C79FC290AD95200E06D57 /* Location.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 958C79F8290AD95200E06D57 /* Location.cpp */; };
 		958C79FD290AD95200E06D57 /* Human.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 958C79FA290AD95200E06D57 /* Human.cpp */; };
@@ -26,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9569AD1229A693B500122B73 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		958C79EE290AD91400E06D57 /* DengueSim */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DengueSim; sourceTree = BUILT_PRODUCTS_DIR; };
 		958C79F1290AD91400E06D57 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		958C79F8290AD95200E06D57 /* Location.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Location.cpp; sourceTree = "<group>"; };
@@ -41,6 +43,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				958C7A00290AD97E00E06D57 /* libgsl.27.dylib in Frameworks */,
+				9569AD1329A693B500122B73 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +82,7 @@
 		958C79FE290AD97E00E06D57 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9569AD1229A693B500122B73 /* Accelerate.framework */,
 				958C79FF290AD97E00E06D57 /* libgsl.27.dylib */,
 			);
 			name = Frameworks;
