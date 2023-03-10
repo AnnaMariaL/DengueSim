@@ -82,7 +82,15 @@ else()
 	message(STATUS "GSL found at ${myGSL}")
 endif()
 
-target_link_libraries(${TARGET_NAME} PUBLIC ${myGSL})
+find_library(myBLAS gslcblas PATHS "/lib64/")
+
+if (${myBLAS} STREQUAL myBLAS-NOTFOUND)
+	message(FATAL_ERROR "BLAS bot found")
+else()
+	message(STATUS "BLAS found at ${myBLAS}")
+endif()
+
+target_link_libraries(${TARGET_NAME} PUBLIC ${myGSL} ${myBLAS})
 
 install(TARGETS denguesim DESTINATION bin)
 
