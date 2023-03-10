@@ -7,9 +7,11 @@
 
 
 #include <stdio.h>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
@@ -22,7 +24,7 @@ using namespace std;
 
 int main(int argc, const char * argv[]) {
     
-    long int argv_randomSeed=42;
+    long int argv_randomSeed=56;
     unsigned int InfectionDuration=200;
     float DiseaseEstablishment=1.6e-6;
     string OutPutFile="output.txt";
@@ -94,9 +96,9 @@ int main(int argc, const char * argv[]) {
     vector<Human> vHuman; //empty vector humans
     
     int32_t locationCount=1; //total number of locations
-    int NumberTicks=5000; //total number of simulated ticks
+    int NumberTicks=200; //total number of simulated ticks
     const double randomProbability=0.5; //0.5939354, Reiner et al. (2014)
-    const double randomSize=10000; //9.01, Reiner et al. (2014)
+    const double randomSize=25000; //9.01, Reiner et al. (2014)
     const long int randomSeed=argv_randomSeed;
     
     unsigned int ExposureDuration=0; //infection parameters
