@@ -42,16 +42,18 @@ void Human::initiateInfection(unsigned int ExposedDuration){
     NTicksInStatus=ExposedDuration;
 }
 
-void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu, unsigned int ExposedDuration, float DiseaseEstablishment) {
-    unsigned int NumberOfLocationVisited;
-    NumberOfLocationVisited = gsl_ran_poisson(prandomNumberGenerator, mu); //determine total number of visited locations
+void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementMu, const double randomMovementTheta, const unsigned int ExposedDuration, const double DiseaseEstablishment) {
     
+    unsigned int NumberOfLocationVisited;
+    double randomMovementProbability = randomMovementTheta/(randomMovementTheta+randomMovementMu);
+    NumberOfLocationVisited = gsl_ran_negative_binomial(prandomNumberGenerator, randomMovementProbability, randomMovementTheta); //determine total number of visited locations
     vector<int32_t> LocationsVisited;
-    int32_t VisitIndex=0;
+    int32_t VisitIndex=1;
     int32_t NumberTrials=0; //to avoid endless loop if only few locations are present
     
+    LocationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
+    
     while (VisitIndex<NumberOfLocationVisited) {
-        
         NumberTrials++;
         
         if (NumberTrials>100*NumberOfLocationVisited) {
@@ -59,23 +61,20 @@ void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumbe
             cout << "Sampling terminated for human " << ID << ". Already sampled places will be visited." << endl;
             break;
         }
-        
         if(NumberOfLocationVisited>=pLocations->size()) {
             cout << "Warning: Human " << ID << " is scheduled to visit " << NumberOfLocationVisited << " locations. Only " << pLocations->size()-1 << " available. ";
             cout << "Sampling terminated." << endl;
             break;
         }
         
-        
         auto LocationIndex = gsl_rng_uniform_int(prandomNumberGenerator, pLocations->size());
         auto AlreadySampled = find(LocationsVisited.begin(), LocationsVisited.end(), LocationIndex);
         
-        if((AlreadySampled==end(LocationsVisited)) & (LocationIndex != GetHomeLocation().getLocationID())) {
+        if(AlreadySampled==end(LocationsVisited)) {
             LocationsVisited.emplace_back(LocationIndex);
             VisitIndex++;
         }
     }
-LocationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
     
     for (int i=0; i<LocationsVisited.size(); i++) {
         int32_t LocationIndex = LocationsVisited[i];

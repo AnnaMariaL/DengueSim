@@ -55,19 +55,27 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-seed 10"
-            isEnabled = "NO">
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-movementMu 8.55"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-gammaInv 100"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 1.5e-6"
-            isEnabled = "NO">
+            argument = "-alpha 1.5e-7"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-output foo.txt"
-            isEnabled = "NO">
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-movementTheta 11.94"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

@@ -12,6 +12,7 @@
 #include <string>
 #include <random>
 #include <vector>
+#include <fstream>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
@@ -48,7 +49,7 @@ public:     //constructors
     unsigned int getNTicksInStatus() {return NTicksInStatus;}
     
     void initiateInfection(unsigned int ExposedDuration);
-    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double mu=2.0, unsigned int ExposedDuration=1, float DiseaseEstablishment = 1e-6);
+    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementMu, const double randomMovementTheta, const unsigned int ExposedDuration, const double DiseaseEstablishment);
     void propagateInfection(unsigned int InfectionDuration, gsl_rng *prandomNumberGenerator);
     
 private:
