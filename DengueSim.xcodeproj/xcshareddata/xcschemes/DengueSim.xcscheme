@@ -54,7 +54,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-seed 10"
+            argument = "-seed 56"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-alphaSeasonality 0.0"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -62,11 +66,15 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-gammaInv 100"
+            argument = "-alpha 0.0333"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 1.5e-7"
+            argument = "-minInfectionDuration 30"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-maxInfectionDuration 30"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

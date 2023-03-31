@@ -39,8 +39,8 @@ public:     //constructors
     int32_t getLocationID(void) const { return ID; }
     int32_t getCurrentVisits(void) const { return Currentvisits; }
     deque<int32_t>::size_type getHistoryLength(void) const {return VisitHistory.size(); }
-    double getCurrentRiskScore(void) const {return CurrentRiskScore;}
-    void updateRiskScore(void);
+    long double getCurrentRiskScore(void) const {return CurrentRiskScore;}
+    void updateCharacteristics(long double currentDiseaseEstablishment);
     void registerVisit(Human &visitor);
 
     void printRiskScoreHistory(void);
@@ -48,10 +48,10 @@ public:     //constructors
 private:
     int32_t ID;
     int32_t Currentvisits; //number of infectious visitors in current tick
-    double CurrentRiskScore;
+    long double CurrentRiskScore; //disease establishment proportion in current tick
     int32_t HistoryLength; //length of the visitor history that should be tracked per location
     deque<int32_t> VisitHistory; //visitor history for <HistoryLength> ticks
-    deque<double> RiskScoreHistory;
+    deque<long double> RiskScoreHistory; //disease establishment proportion history for <HistoryLength> ticks
 };
 
 

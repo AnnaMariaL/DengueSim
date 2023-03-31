@@ -27,9 +27,9 @@ void Location::registerVisit(Human &visitor) {
    if((visitor.getInfectionStatus()==2) & (visitor.getNTicksInStatus()>0)) Currentvisits++; //count infectious visits
 }
 
-void Location::updateRiskScore(void) { //calculate new risk score, add to deque, and reset visit counter
+void Location::updateCharacteristics(long double currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
     //CurrentRiskScore = 1-pow(0.97, Currentvisits); //calculate current risk score
-    CurrentRiskScore = Currentvisits;
+    CurrentRiskScore = currentDiseaseEstablishment; //calculate current disease establishment proportion
     VisitHistory.push_front(Currentvisits); //store number of current visits into deque
     RiskScoreHistory.push_front(CurrentRiskScore); //store current risk score into deque
     
@@ -41,7 +41,7 @@ void Location::updateRiskScore(void) { //calculate new risk score, add to deque,
 
 void Location::printRiskScoreHistory(){
     if(!RiskScoreHistory.empty()) {
-        for(deque<double>::iterator it = RiskScoreHistory.begin(); it!=RiskScoreHistory.end(); ++it) cout << " " << *it ;
+        for(deque<long double>::iterator it = RiskScoreHistory.begin(); it!=RiskScoreHistory.end(); ++it) cout << " " << *it ;
         cout << endl;
     } else {
         cout << "Empty RiskScoreHistory" << endl;

@@ -42,7 +42,7 @@ void Human::initiateInfection(unsigned int ExposedDuration){
     NTicksInStatus=ExposedDuration;
 }
 
-void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementMu, const double randomMovementTheta, const unsigned int ExposedDuration, const double DiseaseEstablishment) {
+void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementMu, const double randomMovementTheta, const unsigned int ExposedDuration) {
     
     unsigned int NumberOfLocationVisited;
     double randomMovementProbability = randomMovementTheta/(randomMovementTheta+randomMovementMu);
@@ -81,8 +81,8 @@ void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumbe
         (*pLocations)[LocationIndex].registerVisit(*this); //register visit
         
         if(InfectionStatus==0) { //register potential exposure of susceptibles
-            int InfectiousVisits = (*pLocations)[LocationIndex].getCurrentRiskScore();
-            
+            int InfectiousVisits = (*pLocations)[LocationIndex].getCurrentVisits();
+            long double DiseaseEstablishment = (*pLocations)[LocationIndex].getCurrentRiskScore();
             for (int j=0; j<InfectiousVisits; j++) {
                 double InfectionProbability = gsl_ran_flat(prandomNumberGenerator, 0 , 1);
                 if (InfectionProbability<DiseaseEstablishment) initiateInfection(ExposedDuration);
@@ -95,20 +95,16 @@ void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumbe
     }
 }
 
-void Human::propagateInfection(unsigned int InfectionDuration, gsl_rng *prandomNumberGenerator){
-    float RecoveryRate = 1/float(InfectionDuration);
-    //if ((InfectionStatus > 0) & (InfectionStatus < 3) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed/infectious period
-    if ((InfectionStatus==1) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed period
+void Human::propagateInfection(const unsigned int MinimumInfectionDuration, const unsigned int MaximumInfectionDuration, gsl_rng *prandomNumberGenerator){
+    //if ((InfectionStatus==1) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed period
     
-    if (InfectionStatus==2) { //rate-based recovery
-        auto RecoveryProbability = gsl_ran_flat(prandomNumberGenerator, 0, 1);
-        if (RecoveryProbability<RecoveryRate) NTicksInStatus=0;
-    }
+    if ((InfectionStatus > 0) & (InfectionStatus < 3) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed/infectious period
     if (InfectionStatus == 3) NTicksInStatus++; //increment recovered period (assuming lifelong immunity)
     
     if ((InfectionStatus==1) & (NTicksInStatus==0)) { //exposed --> infectious
+        auto InfectionDuration = gsl_ran_flat(prandomNumberGenerator, MinimumInfectionDuration-0.5+1e-7, MaximumInfectionDuration+0.5-1e-7);
         InfectionStatus++;
-        NTicksInStatus=InfectionDuration;
+        NTicksInStatus=round(InfectionDuration);
     }
     
     if ((InfectionStatus==2) & (NTicksInStatus==0)) { //infectious --> recovered

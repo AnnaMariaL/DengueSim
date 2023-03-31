@@ -25,8 +25,10 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     
     long int argv_randomSeed=0;
-    unsigned int argv_InfectionDuration=0;
-    double argv_DiseaseEstablishment=0;
+    unsigned int argv_MinimumInfectionDuration=0;
+    unsigned int argv_MaximumInfectionDuration=0;
+    double argv_DiseaseEstablishment=0; //baseline disease establishment proportion
+    double argv_SeasonalityCoefficient=0; //strength of seasonality
     double argv_randomMovementMu = 0; //8.55 over 15-days period, Stoddard et al. (2013)
     double argv_randomMovementTheta = 0; //11.94 over 15-days period, Stoddard et al. (2013)
     string argv_OutPutFile="foo.txt";
@@ -47,19 +49,32 @@ int main(int argc, const char * argv[]) {
             cout << "-seed set to " << argv_randomSeed << endl;
         }
         
-        if (strcmp(argv[arg], "-gammaInv") == 0) //avg. infectious period (= 1 / recovery rate)
+        if (strcmp(argv[arg], "-minInfectionDuration") == 0) //minimum duration of infectious period
         {
             if (arg == argc - 1)
             {
-                cerr << "missing argument for -gammaInv!";
+                cerr << "missing argument for -minInfectionDuration!";
                 exit(1);
             }
-            argv_InfectionDuration = stoi(argv[arg+1]);
+            argv_MinimumInfectionDuration = stoi(argv[arg+1]);
             arg++;
-            cout << "-gammaInv set to " << argv_InfectionDuration << endl;
+            cout << "-minInfectionDuration set to " << argv_MinimumInfectionDuration << endl;
         }
         
-        if (strcmp(argv[arg], "-alpha") == 0) //disease establishment proportion
+        if (strcmp(argv[arg], "-maxInfectionDuration") == 0) //minimum duration of infectious period
+        {
+            if (arg == argc - 1)
+            {
+                cerr << "missing argument for -maxInfectionDuration!";
+                exit(1);
+            }
+            argv_MaximumInfectionDuration = stoi(argv[arg+1]);
+            arg++;
+            cout << "-maxInfectionDuration set to " << argv_MaximumInfectionDuration << endl;
+        }
+        
+        
+        if (strcmp(argv[arg], "-alpha") == 0) //baseline disease establishment proportion
         {
             if (arg == argc - 1)
             {
@@ -69,6 +84,18 @@ int main(int argc, const char * argv[]) {
             argv_DiseaseEstablishment = stof(argv[arg+1]);
             arg++;
             cout << "-alpha set to " << argv_DiseaseEstablishment << endl;
+        }
+        
+        if (strcmp(argv[arg], "-alphaSeasonality") == 0) //baseline disease establishment proportion
+        {
+            if (arg == argc - 1)
+            {
+                cerr << "missing argument for -alphaSeasonality!";
+                exit(1);
+            }
+            argv_SeasonalityCoefficient = stof(argv[arg+1]);
+            arg++;
+            cout << "-alphaSeasonality set to " << argv_SeasonalityCoefficient << endl;
         }
         
         if(strcmp(argv[arg], "-movementMu") == 0) //average number of places visited, human movement (negative binomial distribution)
@@ -112,8 +139,10 @@ int main(int argc, const char * argv[]) {
     system("pwd");
     
     const long int randomSeed=argv_randomSeed; //variables from argument parser
-    const unsigned int InfectionDuration=argv_InfectionDuration;
+    const unsigned int MinimumInfectionDuration=argv_MinimumInfectionDuration;
+    const unsigned int MaximumInfectionDuration=argv_MaximumInfectionDuration;
     const double DiseaseEstablishment=argv_DiseaseEstablishment;
+    const double SeasonalityCoefficient=argv_SeasonalityCoefficient;
     const double randomMovementMu=argv_randomMovementMu;
     const double randomMovementTheta=argv_randomMovementTheta;
     const string OutPutFile=argv_OutPutFile;
@@ -148,16 +177,15 @@ int main(int argc, const char * argv[]) {
      }
     
     for (int currentTick=1; currentTick<=NumberTicks; currentTick++) {//for each tick
-        for (auto &rHuman:vHuman) rHuman.generateMovement(&vLocation, prandomNumberGenerator, randomMovementMu, randomMovementTheta, ExposureDuration, DiseaseEstablishment); //generate movement
-        for(auto &rLocation:vLocation) rLocation.updateRiskScore(); //update risk score for each location
-        for(auto &rHuman:vHuman) rHuman.propagateInfection(InfectionDuration,prandomNumberGenerator); //update infection status
+        for (auto &rHuman:vHuman) rHuman.generateMovement(&vLocation, prandomNumberGenerator, randomMovementMu, randomMovementTheta, ExposureDuration); //generate movement
+        long double currentDiseaseEstablishment = DiseaseEstablishment*(1+ SeasonalityCoefficient * gsl_sf_cos(2*M_PI*(currentTick-NumberTicks/2)/NumberTicks)); //calculate current disease establishment proportion
+        for(auto &rLocation:vLocation) rLocation.updateCharacteristics(currentDiseaseEstablishment); //update disease establishment proportion & visits/location
+        for(auto &rHuman:vHuman) rHuman.propagateInfection(MinimumInfectionDuration,MaximumInfectionDuration,prandomNumberGenerator); //update infection status
         auto SusceptibleCount = count_if(vHuman.begin(), vHuman.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==0;}); //generate output
         auto ExposedCount = count_if(vHuman.begin(), vHuman.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==1;});
         auto InfectiousCount = count_if(vHuman.begin(), vHuman.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==2;});
         auto RecoveredCount = count_if(vHuman.begin(), vHuman.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==3;});
-        //myfile << currentTick << "\t" << SusceptibleCount << "\t" << ExposedCount << "\t" << InfectiousCount << "\t" << RecoveredCount << endl;
-        long double test = DiseaseEstablishment*(1+ 1e-6 * gsl_sf_cos(1/2*2*M_PI*(currentTick-NumberTicks/2)/NumberTicks));
-        myfile << test << endl;
+        myfile << currentTick << "\t" << SusceptibleCount << "\t" << ExposedCount << "\t" << InfectiousCount << "\t" << RecoveredCount << endl;
     }
     myfile.close();
     gsl_rng_free(prandomNumberGenerator);
