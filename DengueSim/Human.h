@@ -49,7 +49,7 @@ public:     //constructors
     unsigned int getNTicksInStatus() {return NTicksInStatus;}
     
     void initiateInfection(unsigned int ExposedDuration);
-    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementMu, const double randomMovementTheta, const unsigned int ExposedDuration);
+    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementShape, const double randomMovementRate, const unsigned int ExposedDuration);
     void propagateInfection(const unsigned int MinimumInfectionDuration, const unsigned int MaximumInfectionDuration, gsl_rng *prandomNumberGenerator);
     
 private:

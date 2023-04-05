@@ -54,7 +54,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-seed 56"
+            argument = "-seed 42"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -62,27 +62,27 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementMu 8.55"
+            argument = "-movementShape 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 0.0333"
+            argument = "-movementRate 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-minInfectionDuration 30"
+            argument = "-alpha 0.1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-maxInfectionDuration 30"
+            argument = "-minInfectionDuration 1"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-maxInfectionDuration 10"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-output foo.txt"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-movementTheta 11.94"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

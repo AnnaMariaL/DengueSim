@@ -27,10 +27,12 @@ int main(int argc, const char * argv[]) {
     long int argv_randomSeed=0;
     unsigned int argv_MinimumInfectionDuration=0;
     unsigned int argv_MaximumInfectionDuration=0;
-    double argv_DiseaseEstablishment=0; //baseline disease establishment proportion
-    double argv_SeasonalityCoefficient=0; //strength of seasonality
-    double argv_randomMovementMu = 0; //8.55 over 15-days period, Stoddard et al. (2013)
-    double argv_randomMovementTheta = 0; //11.94 over 15-days period, Stoddard et al. (2013)
+    double argv_DiseaseEstablishment=0; // baseline disease establishment proportion
+    double argv_SeasonalityCoefficient=0; // strength of seasonality
+    //double argv_randomMovementMu = 0; // 8.55 over 15-days period, Stoddard et al. (2013)
+    //double argv_randomMovementTheta = 0; // 11.94 over 15-days period, Stoddard et al. (2013)
+    double argv_randomMovementShape=0; // 8.18 estimated from Schaber et al. (2019)
+    double argv_randomMovementRate=0; // 3.55 estimated from Schaber et al. (2019)
     string argv_OutPutFile="foo.txt";
     
     for (int arg = 1; arg < argc; ++arg) //parse command line arguments
@@ -98,28 +100,28 @@ int main(int argc, const char * argv[]) {
             cout << "-alphaSeasonality set to " << argv_SeasonalityCoefficient << endl;
         }
         
-        if(strcmp(argv[arg], "-movementMu") == 0) //average number of places visited, human movement (negative binomial distribution)
+        if(strcmp(argv[arg], "-movementShape") == 0) //average number of places visited, human movement (negative binomial distribution)
         {
             if (arg == argc - 1)
             {
-                cerr << "missing argument for -movementMu!";
+                cerr << "missing argument for -movementShape!";
                 exit(1);
             }
-            argv_randomMovementMu = stod(argv[arg+1]);
+            argv_randomMovementShape = stod(argv[arg+1]);
             arg++;
-            cout << "-movementMu set to " << argv_randomMovementMu << endl;
+            cout << "-movementShape set to " << argv_randomMovementShape << endl;
         }
         
-        if(strcmp(argv[arg], "-movementTheta") == 0) //size parameter, human movement (negative binomial distribution)
+        if(strcmp(argv[arg], "-movementRate") == 0) //size parameter, human movement (negative binomial distribution)
         {
             if (arg == argc - 1)
             {
-                cerr << "missing argument for -movementTheta!";
+                cerr << "missing argument for -movementRate!";
                 exit(1);
             }
-            argv_randomMovementTheta = stod(argv[arg+1]);
+            argv_randomMovementRate = stod(argv[arg+1]);
             arg++;
-            cout << "-movementTheta set to " << argv_randomMovementTheta << endl;
+            cout << "-movementRate set to " << argv_randomMovementRate << endl;
         }
         
         
@@ -143,15 +145,15 @@ int main(int argc, const char * argv[]) {
     const unsigned int MaximumInfectionDuration=argv_MaximumInfectionDuration;
     const double DiseaseEstablishment=argv_DiseaseEstablishment;
     const double SeasonalityCoefficient=argv_SeasonalityCoefficient;
-    const double randomMovementMu=argv_randomMovementMu;
-    const double randomMovementTheta=argv_randomMovementTheta;
+    const double randomMovementShape=argv_randomMovementShape;
+    const double randomMovementRate=argv_randomMovementRate;
     const string OutPutFile=argv_OutPutFile;
     
     vector<Location> vLocation; //empty vector location
     vector<Human> vHuman; //empty vector humans
     
     int32_t locationCount=1000; //total number of locations
-    int NumberTicks=365; //total number of simulated ticks
+    int NumberTicks=365 ; //total number of simulated ticks
     const double randomProbability=0.594; //0.5939354, Reiner et al. (2014)
     const double randomSize=9.01; //9.01, Reiner et al. (2014)
     unsigned int ExposureDuration=0; //infection parameters
@@ -177,7 +179,7 @@ int main(int argc, const char * argv[]) {
      }
     
     for (int currentTick=1; currentTick<=NumberTicks; currentTick++) {//for each tick
-        for (auto &rHuman:vHuman) rHuman.generateMovement(&vLocation, prandomNumberGenerator, randomMovementMu, randomMovementTheta, ExposureDuration); //generate movement
+        for (auto &rHuman:vHuman) rHuman.generateMovement(&vLocation, prandomNumberGenerator, randomMovementShape, randomMovementRate, ExposureDuration); //generate movement
         long double currentDiseaseEstablishment = DiseaseEstablishment*(1+ SeasonalityCoefficient * gsl_sf_cos(2*M_PI*(currentTick-NumberTicks/2)/NumberTicks)); //calculate current disease establishment proportion
         for(auto &rLocation:vLocation) rLocation.updateCharacteristics(currentDiseaseEstablishment); //update disease establishment proportion & visits/location
         for(auto &rHuman:vHuman) rHuman.propagateInfection(MinimumInfectionDuration,MaximumInfectionDuration,prandomNumberGenerator); //update infection status
