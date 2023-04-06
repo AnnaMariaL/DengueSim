@@ -62,11 +62,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementShape 1"
+            argument = "-movementShape 4"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementRate 1"
+            argument = "-movementRate 2"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

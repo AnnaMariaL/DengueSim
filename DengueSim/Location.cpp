@@ -24,7 +24,7 @@ void generateLocations(const int32_t locationCount, vector<Location> *pLocations
 }
 
 void Location::registerVisit(Human &visitor) {
-   if((visitor.getInfectionStatus()==2) & (visitor.getNTicksInStatus()>0)) Currentvisits++; //count infectious visits
+   if((visitor.getInfectionStatus()==InfectionStatus::kInfected) & (visitor.getNTicksInStatus()>0)) Currentvisits++; //count infectious visits
 }
 
 void Location::updateCharacteristics(long double currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
