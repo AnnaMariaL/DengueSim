@@ -44,14 +44,14 @@ void Human::initiateInfection(unsigned int ExposedDuration){
 
 void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementShape, const double randomMovementRate, const unsigned int ExposedDuration) {
     
-    int32_t NumberOfLocationVisited = round(gsl_ran_gamma(prandomNumberGenerator, randomMovementShape, 1/randomMovementRate));
+    vector<Location>::size_type NumberOfLocationVisited = round(gsl_ran_gamma(prandomNumberGenerator, randomMovementShape, 1/randomMovementRate));
     if (NumberOfLocationVisited==0) NumberOfLocationVisited=1; //visit at least home
     //double randomMovementProbability = randomMovementTheta/(randomMovementTheta+randomMovementMu);
     //NumberOfLocationVisited = gsl_ran_negative_binomial(prandomNumberGenerator, randomMovementProbability, randomMovementTheta); //determine total number of visited locations
     
     vector<int32_t> LocationsVisited;
-    int32_t VisitIndex=1;
-    int32_t NumberTrials=0; //to avoid endless loop if only few locations are present
+    vector<Location>::size_type VisitIndex=1;
+    vector<Location>::size_type NumberTrials=0; //to avoid endless loop if only few locations are present
     
     LocationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
     
