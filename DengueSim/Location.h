@@ -35,7 +35,7 @@ public:     //constructors
     // default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer
     Location(Location&&) noexcept = default;
     
-    explicit Location(const int32_t i, const int HistoryLength=10): ID(i), Currentvisits(0), HistoryLength(HistoryLength), CurrentRiskScore(0) {};
+    explicit Location(const int32_t i, const int p_historyLength=10): ID(i), Currentvisits(0), HistoryLength(p_historyLength), CurrentRiskScore(0) {};
     int32_t getLocationID(void) const { return ID; }
     int32_t getCurrentVisits(void) const { return Currentvisits; }
     deque<int32_t>::size_type getHistoryLength(void) const {return VisitHistory.size(); }

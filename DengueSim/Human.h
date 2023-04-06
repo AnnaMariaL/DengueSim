@@ -40,8 +40,8 @@ public:     //constructors
     //default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer 
     Human(Human&&) noexcept = default;
     
-    Human(const int32_t humanID, Location &rhomeLocation, unsigned int InfectionStatus, unsigned int NTicksInStatus): ID(humanID), rhomeLocation(rhomeLocation), InfectionStatus(InfectionStatus), NTicksInStatus(NTicksInStatus){}
-    Human(const int32_t humanID, Location &rhomeLocation): Human(humanID,rhomeLocation,0,0) {}
+    Human(const int32_t humanID, Location &p_rhomeLocation, unsigned int p_infectionStatus, unsigned int p_ticksInStatus): ID(humanID), rhomeLocation(p_rhomeLocation), InfectionStatus(p_infectionStatus), NTicksInStatus(p_ticksInStatus){}
+    Human(const int32_t humanID, Location &p_rhomeLocation): Human(humanID,p_rhomeLocation,0,0) {}
     //void MoveAround(std::vector<Location> &allLocations); //infection happens here
     
     Location &GetHomeLocation(void) const { return rhomeLocation; }
