@@ -21,14 +21,22 @@ using namespace std;
 class Human;
 class Location;
 
-extern std::ostream &print(std::ostream &os, const Human &rHuman);
+typedef enum class _InfectionStatus {
+    kSusceptible = 0,
+    kExposed,
+    kInfected,
+    kRecovered
+} InfectionStatus;
 
-extern void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const int32_t humanCount=6);
+extern std::ostream &print(std::ostream &p_os, InfectionStatus p_status);
+extern std::ostream &print(std::ostream &p_os, const Human &p_Human);
 
-extern void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const double randomProbability, const double randomSize, gsl_rng *prandomNumberGenerator);
+extern void generateHumans(vector<Location> &p_Locations, vector<Human> *p_Humans, const int32_t p_humanCount=6);
+
+extern void generateHumans(vector<Location> &p_Locations, vector<Human> *p_Humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_randomNumberGenerator);
 
 class Human {
-friend std::ostream &print(std::ostream &os, const Human &rHuman);
+friend std::ostream &print(std::ostream &p_os, const Human &p_Human);
 
 public:     //constructors
     //decativate copy constructor: Human h(h12);
@@ -40,23 +48,22 @@ public:     //constructors
     //default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer 
     Human(Human&&) noexcept = default;
     
-    Human(const int32_t humanID, Location &p_rhomeLocation, unsigned int p_infectionStatus, unsigned int p_ticksInStatus): ID(humanID), rhomeLocation(p_rhomeLocation), InfectionStatus(p_infectionStatus), NTicksInStatus(p_ticksInStatus){}
-    Human(const int32_t humanID, Location &p_rhomeLocation): Human(humanID,p_rhomeLocation,0,0) {}
-    //void MoveAround(std::vector<Location> &allLocations); //infection happens here
+    Human(const int32_t p_humanID, Location &p_rhomeLocation, InfectionStatus p_infectionStatus, unsigned int p_ticksInStatus): id_(p_humanID), rhomeLocation_(p_rhomeLocation), infectionStatus_(p_infectionStatus), nTicksInStatus_(p_ticksInStatus){}
+    Human(const int32_t p_humanID, Location &p_rhomeLocation): Human(p_humanID,p_rhomeLocation,InfectionStatus::kSusceptible,0) {}
     
-    Location &GetHomeLocation(void) const { return rhomeLocation; }
-    unsigned int getInfectionStatus() {return InfectionStatus;}
-    unsigned int getNTicksInStatus() {return NTicksInStatus;}
+    Location &getHomeLocation(void) const { return rhomeLocation_; }
+    InfectionStatus getInfectionStatus() {return infectionStatus_;}
+    unsigned int getNTicksInStatus() {return nTicksInStatus_;}
     
-    void initiateInfection(unsigned int ExposedDuration);
-    void generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementShape, const double randomMovementRate, const unsigned int ExposedDuration);
-    void propagateInfection(const unsigned int MinimumInfectionDuration, const unsigned int MaximumInfectionDuration, gsl_rng *prandomNumberGenerator);
+    void initiateInfection(unsigned int p_exposureDuration);
+    void generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNumberGenerator, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration);
+    void propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_randomNumberGenerator);
     
 private:
-    int32_t ID;
-    Location &rhomeLocation; //reference, because home is not changing & must not be a null ptr.
-    unsigned int InfectionStatus=0; //0 = susceptible, 1 = exposed, 2 = infected, 3 = recovered
-    unsigned int NTicksInStatus=0; //remaining ticks in status (i.e., 5 remaining infectious ticks), non-informative for susceptible class
+    int32_t id_;
+    Location &rhomeLocation_; //reference, because home is not changing & must not be a null ptr.
+    InfectionStatus infectionStatus_ = InfectionStatus::kSusceptible;
+    unsigned int nTicksInStatus_ = 0; //remaining ticks in exposed & infectous class; non-informative for susceptible class; number of ticks in recovered class
 };
 
 #endif /* Human_h */

@@ -12,36 +12,35 @@
 #include "Location.h"
 #include "Human.h"
 
-std::ostream &print(std::ostream &os, const Location &rLocation)
+std::ostream &print(std::ostream &p_os, const Location &p_Location)
 {
-    os << rLocation.getLocationID() << " " <<  rLocation.getCurrentVisits() << " " << rLocation.getCurrentRiskScore();
-    return os;
+    p_os << p_Location.getLocationID() << " " <<  p_Location.getCurrentVisits() << " " << p_Location.getCurrentRiskScore();
+    return p_os;
 }
 
-void generateLocations(const int32_t locationCount, vector<Location> *pLocations) { //use pointer to locations to avoid copying
-    for(int32_t i=0; i<locationCount; i++)
-        pLocations->emplace_back(i);
+void generateLocations(const int32_t p_locationCount, vector<Location> *p_Locations) { //use pointer to locations to avoid copying
+    for(int32_t i=0; i<p_locationCount; i++)
+        p_Locations->emplace_back(i);
 }
 
-void Location::registerVisit(Human &visitor) {
-   if((visitor.getInfectionStatus()==2) & (visitor.getNTicksInStatus()>0)) Currentvisits++; //count infectious visits
+void Location::registerVisit(Human &p_visitor) {
+   if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getNTicksInStatus()>0)) currentvisits_++; //count infectious visits
 }
 
-void Location::updateCharacteristics(long double currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
-    //CurrentRiskScore = 1-pow(0.97, Currentvisits); //calculate current risk score
-    CurrentRiskScore = currentDiseaseEstablishment; //calculate current disease establishment proportion
-    VisitHistory.push_front(Currentvisits); //store number of current visits into deque
-    RiskScoreHistory.push_front(CurrentRiskScore); //store current risk score into deque
+void Location::updateCharacteristics(long double p_currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
+    currentRiskScore_ = p_currentDiseaseEstablishment; //current disease establishment proportion
+    visitHistory_.push_front(currentvisits_); //store number of current visits into deque
+    riskScoreHistory_.push_front(currentRiskScore_); //store current risk score into deque
     
-    if(VisitHistory.size()>HistoryLength) VisitHistory.resize(HistoryLength); //resize deque if necessary
-    if(RiskScoreHistory.size()>HistoryLength) RiskScoreHistory.resize(HistoryLength); //resize deque if necessary
+    if(visitHistory_.size()>historyLength_) visitHistory_.resize(historyLength_); //resize deque if necessary
+    if(riskScoreHistory_.size()>historyLength_) riskScoreHistory_.resize(historyLength_); //resize deque if necessary
     
-    Currentvisits=0; //reset the number of currentvisits
+    currentvisits_=0; //reset the number of currentvisits
 }
 
 void Location::printRiskScoreHistory(){
-    if(!RiskScoreHistory.empty()) {
-        for(deque<long double>::iterator it = RiskScoreHistory.begin(); it!=RiskScoreHistory.end(); ++it) cout << " " << *it ;
+    if(!riskScoreHistory_.empty()) {
+        for(deque<long double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) cout << " " << *it ;
         cout << endl;
     } else {
         cout << "Empty RiskScoreHistory" << endl;
@@ -49,8 +48,8 @@ void Location::printRiskScoreHistory(){
 }
 
 void Location::printVisitHistory(){
-    if(!VisitHistory.empty()) {
-        for (deque<int32_t>::iterator it = VisitHistory.begin(); it != VisitHistory.end(); ++it) cout << " " << *it;
+    if(!visitHistory_.empty()) {
+        for (deque<int32_t>::iterator it = visitHistory_.begin(); it != visitHistory_.end(); ++it) cout << " " << *it;
         cout << endl;
     } else {
         cout << "Empty VisitHistory." << endl;
