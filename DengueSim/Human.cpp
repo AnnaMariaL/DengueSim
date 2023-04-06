@@ -25,7 +25,7 @@ void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const 
 }
 
 void generateHumans(vector<Location> &rLocations, vector<Human> *pHumans, const double randomProbability, const double randomSize, gsl_rng *prandomNumberGenerator){
-    unsigned int InhabitantsPerLocation;
+    int32_t InhabitantsPerLocation;
     int32_t humanID=0;
     
     for (auto &rLocation : rLocations) {//reference to individual location
@@ -44,7 +44,7 @@ void Human::initiateInfection(unsigned int ExposedDuration){
 
 void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumberGenerator, const double randomMovementShape, const double randomMovementRate, const unsigned int ExposedDuration) {
     
-    auto NumberOfLocationVisited = round(gsl_ran_gamma(prandomNumberGenerator, randomMovementShape, 1/randomMovementRate));
+    int32_t NumberOfLocationVisited = round(gsl_ran_gamma(prandomNumberGenerator, randomMovementShape, 1/randomMovementRate));
     if (NumberOfLocationVisited==0) NumberOfLocationVisited=1; //visit at least home
     //double randomMovementProbability = randomMovementTheta/(randomMovementTheta+randomMovementMu);
     //NumberOfLocationVisited = gsl_ran_negative_binomial(prandomNumberGenerator, randomMovementProbability, randomMovementTheta); //determine total number of visited locations
@@ -78,7 +78,7 @@ void Human::generateMovement(vector<Location> *pLocations, gsl_rng *prandomNumbe
         }
     }
     
-    for (int i=0; i<LocationsVisited.size(); i++) {
+    for (int32_t i=0; i<LocationsVisited.size(); i++) {
         int32_t LocationIndex = LocationsVisited[i];
         (*pLocations)[LocationIndex].registerVisit(*this); //register visit
         
