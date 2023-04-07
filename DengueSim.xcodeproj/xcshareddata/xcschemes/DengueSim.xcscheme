@@ -58,19 +58,19 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alphaSeasonality -0.05"
+            argument = "-alphaSeasonality 0"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementShape 4"
+            argument = "-movementShape 8.18"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementRate 2"
+            argument = "-movementRate 3.55"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 0.05"
+            argument = "-alpha 0.025"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

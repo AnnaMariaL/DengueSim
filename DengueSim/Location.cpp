@@ -12,19 +12,19 @@
 #include "Location.h"
 #include "Human.h"
 
-std::ostream &print(std::ostream &p_os, const Location &p_Location)
+std::ostream &print(std::ostream &p_os, const Location &p_location)
 {
-    p_os << p_Location.getLocationID() << " " <<  p_Location.getCurrentVisits() << " " << p_Location.getCurrentRiskScore();
+    p_os << p_location.getLocationID() << " " <<  p_location.getCurrentVisits() << " " << p_location.getCurrentRiskScore();
     return p_os;
 }
 
-void generateLocations(const int32_t p_locationCount, vector<Location> *p_Locations) { //use pointer to locations to avoid copying
+void generateLocations(const int32_t p_locationCount, std::vector<Location> *p_locations) { //use pointer to locations to avoid copying
     for(int32_t i=0; i<p_locationCount; i++)
-        p_Locations->emplace_back(i);
+        p_locations->emplace_back(i);
 }
 
 void Location::registerVisit(Human &p_visitor) {
-    if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getNTicksInStatus()>0)) currentvisits_++; //count infectious visits
+    if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getRemainingTicksInStatus()>0)) currentvisits_++; //count infectious visits
 }
 
 void Location::updateCharacteristics(long double p_currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
@@ -38,20 +38,20 @@ void Location::updateCharacteristics(long double p_currentDiseaseEstablishment) 
     currentRiskScore_ = p_currentDiseaseEstablishment; //update currentRiskScore_
 }
 
-void Location::printRiskScoreHistory(){
+void Location::printRiskScoreHistory(void){
     if(!riskScoreHistory_.empty()) {
-        for(deque<long double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) cout << " " << *it ;
-        cout << endl;
+        for(std::deque<long double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) std::cout << " " << *it ;
+        std::cout << std::endl;
     } else {
-        cout << "Empty riskScoreHistory" << endl;
+        std::cout << "Empty riskScoreHistory" << std::endl;
     }
 }
 
-void Location::printVisitHistory(){
+void Location::printVisitHistory(void){
     if(!visitHistory_.empty()) {
-        for (deque<int32_t>::iterator it = visitHistory_.begin(); it != visitHistory_.end(); ++it) cout << " " << *it;
-        cout << endl;
+        for (std::deque<int32_t>::iterator it = visitHistory_.begin(); it != visitHistory_.end(); ++it) std::cout << " " << *it;
+        std::cout << std::endl;
     } else {
-        cout << "Empty visitHistory." << endl;
+        std::cout << "Empty visitHistory." << std::endl;
     }
 }
