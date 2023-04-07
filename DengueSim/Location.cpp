@@ -23,8 +23,13 @@ void generateLocations(const int32_t p_locationCount, vector<Location> *p_Locati
         p_Locations->emplace_back(i);
 }
 
+<<<<<<< HEAD
 void Location::registerVisit(Human &p_visitor) {
    if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getNTicksInStatus()>0)) currentvisits_++; //count infectious visits
+=======
+void Location::registerVisit(Human &visitor) {
+   if((visitor.getInfectionStatus()==InfectionStatus::kInfected) & (visitor.getNTicksInStatus()>0)) Currentvisits++; //count infectious visits
+>>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
 }
 
 void Location::updateCharacteristics(long double p_currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
