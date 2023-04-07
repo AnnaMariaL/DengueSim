@@ -24,18 +24,18 @@ void generateLocations(const int32_t p_locationCount, vector<Location> *p_Locati
 }
 
 void Location::registerVisit(Human &p_visitor) {
-   if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getNTicksInStatus()>0)) currentvisits_++; //count infectious visits
+    if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getNTicksInStatus()>0)) currentvisits_++; //count infectious visits
 }
 
 void Location::updateCharacteristics(long double p_currentDiseaseEstablishment) { //calculate new risk score, add to deque, and reset visit counter
-    currentRiskScore_ = p_currentDiseaseEstablishment; //current disease establishment proportion
     visitHistory_.push_front(currentvisits_); //store number of current visits into deque
     riskScoreHistory_.push_front(currentRiskScore_); //store current risk score into deque
     
     if(visitHistory_.size()>historyLength_) visitHistory_.resize(historyLength_); //resize deque if necessary
     if(riskScoreHistory_.size()>historyLength_) riskScoreHistory_.resize(historyLength_); //resize deque if necessary
     
-    currentvisits_=0; //reset the number of currentvisits
+    currentvisits_=0; //reset currentvisits_
+    currentRiskScore_ = p_currentDiseaseEstablishment; //update currentRiskScore_
 }
 
 void Location::printRiskScoreHistory(){
@@ -43,7 +43,7 @@ void Location::printRiskScoreHistory(){
         for(deque<long double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) cout << " " << *it ;
         cout << endl;
     } else {
-        cout << "Empty RiskScoreHistory" << endl;
+        cout << "Empty riskScoreHistory" << endl;
     }
 }
 
@@ -52,6 +52,6 @@ void Location::printVisitHistory(){
         for (deque<int32_t>::iterator it = visitHistory_.begin(); it != visitHistory_.end(); ++it) cout << " " << *it;
         cout << endl;
     } else {
-        cout << "Empty VisitHistory." << endl;
+        cout << "Empty visitHistory." << endl;
     }
 }

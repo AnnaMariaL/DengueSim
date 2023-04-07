@@ -54,7 +54,7 @@ public:     //constructors
     Location &getHomeLocation(void) const { return rhomeLocation_; }
     InfectionStatus getInfectionStatus() {return infectionStatus_;}
     unsigned int getNTicksInStatus() {return nTicksInStatus_;}
-    
+    int32_t getID(void) {return id_; }
     void initiateInfection(unsigned int p_exposureDuration);
     void generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNumberGenerator, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration);
     void propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_randomNumberGenerator);

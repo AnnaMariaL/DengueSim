@@ -58,11 +58,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alphaSeasonality 0.0"
+            argument = "-alphaSeasonality 0.1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementShape 3"
+            argument = "-movementShape 2"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -70,7 +70,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 0.1"
+            argument = "-alpha 0.01"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -78,7 +78,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-maxInfectionDuration 10"
+            argument = "-maxInfectionDuration 5"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

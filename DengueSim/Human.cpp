@@ -48,7 +48,7 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
     double randomDrawNumberOfLocations = gsl_ran_gamma(p_randomNumberGenerator, p_randomMovementShape, 1/p_randomMovementRate);
     if (randomDrawNumberOfLocations<=0) randomDrawNumberOfLocations=1;   //visit at least home
     size_t numberOfLocationVisited = (size_t)round(randomDrawNumberOfLocations);
-
+    
     vector<int32_t> locationsVisited;
     size_t visitIndex=1;
     size_t numberTrials=0; //to avoid endless loop if only few locations are present
@@ -83,8 +83,8 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
         (*p_Locations)[locationIndex].registerVisit(*this); //register visit
         
         if(infectionStatus_== InfectionStatus::kSusceptible) { //register potential exposure of susceptibles
-            int infectiousVisits = (*p_Locations)[locationIndex].getCurrentVisits();
-            long double diseaseEstablishment = (*p_Locations)[locationIndex].getCurrentRiskScore();
+            int infectiousVisits = (*p_Locations)[locationIndex].accessVisits(0);
+            long double diseaseEstablishment = (*p_Locations)[locationIndex].accessRiskScores(0);
             for (int j=0; j<infectiousVisits; j++) {
                 double infectionProbability = gsl_ran_flat(p_randomNumberGenerator, 0 , 1);
                 if (infectionProbability<diseaseEstablishment) initiateInfection(p_exposureDuration);
@@ -94,19 +94,27 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
 }
 
 void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_randomNumberGenerator){
-    if ((infectionStatus_ != InfectionStatus::kSusceptible) & ( infectionStatus_!=InfectionStatus::kRecovered) & (nTicksInStatus_>0)) nTicksInStatus_--; //decrement exposed/infectious period
-    if (infectionStatus_ == InfectionStatus::kRecovered) nTicksInStatus_++; //increment recovered period (assuming lifelong immunity)
     
-    if ((infectionStatus_==InfectionStatus::kExposed) & (nTicksInStatus_==0)) { //exposed --> infectious
-        auto infectionDuration = gsl_ran_flat(p_randomNumberGenerator, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
-        infectionStatus_ = InfectionStatus::kInfected;
-        nTicksInStatus_=(unsigned int)round(infectionDuration);
+    if (infectionStatus_ == InfectionStatus::kInfected) {
+        if(nTicksInStatus_ == 0) {
+            infectionStatus_ = InfectionStatus::kRecovered;
+        } else {
+            nTicksInStatus_--;
+        }
     }
     
-    if ((infectionStatus_==InfectionStatus::kInfected) & (nTicksInStatus_==0)) { //infectious --> recovered
-        infectionStatus_=InfectionStatus::kRecovered;
-        nTicksInStatus_=0;
+    if (infectionStatus_ == InfectionStatus::kExposed) {
+        if(nTicksInStatus_ == 0) {
+            auto infectionDuration = gsl_ran_flat(p_randomNumberGenerator, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
+            infectionStatus_ = InfectionStatus::kInfected;
+            nTicksInStatus_=(unsigned int)round(infectionDuration);
+            
+        } else {
+            nTicksInStatus_--;
+        }
     }
+    
+    if ((infectionStatus_==InfectionStatus::kRecovered) & (nTicksInStatus_>0)) nTicksInStatus_++;
 }
 
 std::ostream &print(std::ostream &p_os, InfectionStatus p_status)

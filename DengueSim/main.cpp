@@ -29,8 +29,6 @@ int main(int argc, const char * argv[]) {
     unsigned int argv_maximumInfectionDuration=0;
     double argv_diseaseEstablishment=0; // baseline disease establishment proportion
     double argv_seasonalityCoefficient=0; // strength of seasonality
-    //double argv_randomMovementMu = 0; // 8.55 over 15-days period, Stoddard et al. (2013)
-    //double argv_randomMovementTheta = 0; // 11.94 over 15-days period, Stoddard et al. (2013)
     double argv_randomMovementShape=0; // 8.18 estimated from Schaber et al. (2019)
     double argv_randomMovementRate=0; // 3.55 estimated from Schaber et al. (2019)
     string argv_outputFile="foo.txt";
@@ -168,8 +166,11 @@ int main(int argc, const char * argv[]) {
     generateLocations(locationCount, &v_Location); //set up locations (use pointer to avoid copying)
     generateHumans(v_Location, &v_Human, humansPerLocationNegBinomProb,humansperLocationNegBinomN,randomNumberGenerator);//set up humans, # of humans per location ~ nbinom
 
-    auto infectionSeed = gsl_rng_uniform_int(randomNumberGenerator, v_Human.size()); //seed infection
+    auto infectionSeed = gsl_rng_uniform_int(randomNumberGenerator, v_Human.size()); //seed infection via an exposed individual
     v_Human[infectionSeed].initiateInfection(exposureDuration);
+    
+    long double startValueDiseaseEstablishment = diseaseEstablishment*(1+ seasonalityCoefficient * gsl_sf_cos(2*M_PI*(0-numberTicks/2)/numberTicks)); //set disease establishment proportion
+    for (auto &rLocation:v_Location) rLocation.initiateRiskScore(startValueDiseaseEstablishment);
     
     ofstream myfile;
     myfile.open(outputFile);
@@ -181,8 +182,9 @@ int main(int argc, const char * argv[]) {
     for (int currentTick=1; currentTick<=numberTicks; currentTick++) {//for each tick
         for (auto &rHuman:v_Human) rHuman.generateMovement(&v_Location, randomNumberGenerator, randomMovementShape, randomMovementRate, exposureDuration); //generate movement
         long double currentDiseaseEstablishment = diseaseEstablishment*(1+ seasonalityCoefficient * gsl_sf_cos(2*M_PI*(currentTick-numberTicks/2)/numberTicks)); //calculate current disease establishment proportion
-        for(auto &rLocation:v_Location) rLocation.updateCharacteristics(currentDiseaseEstablishment); //update disease establishment proportion & visits/location
+        for(auto &rLocation:v_Location) rLocation.updateCharacteristics(currentDiseaseEstablishment);//update disease establishment proportion & visits/location
         for(auto &rHuman:v_Human) rHuman.propagateInfection(minimumInfectionDuration,maximumInfectionDuration,randomNumberGenerator); //update infection status
+        
         auto SusceptibleCount = count_if(v_Human.begin(), v_Human.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==InfectionStatus::kSusceptible;}); //generate output
         auto ExposedCount = count_if(v_Human.begin(), v_Human.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==InfectionStatus::kExposed;});
         auto InfectiousCount = count_if(v_Human.begin(), v_Human.end(), [](Human &rHuman) {return rHuman.getInfectionStatus()==InfectionStatus::kInfected;});
