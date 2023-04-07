@@ -94,27 +94,29 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
 }
 
 void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_randomNumberGenerator){
-    
-    if (infectionStatus_ == InfectionStatus::kInfected) {
-        if(nTicksInStatus_ == 0) {
-            infectionStatus_ = InfectionStatus::kRecovered;
-        } else {
-            nTicksInStatus_--;
-        }
+    switch (infectionStatus_) {
+        case InfectionStatus::kSusceptible: //do nothing for susceptibles
+            break;
+        case InfectionStatus::kExposed:
+            if(nTicksInStatus_==0) { //exposed --> infected if exposed period has passed
+                auto infectionDuration = gsl_ran_flat(p_randomNumberGenerator, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
+                infectionStatus_ = InfectionStatus::kInfected;
+                nTicksInStatus_=(unsigned int)round(infectionDuration);
+            } else { //decrement exposed period
+                nTicksInStatus_--;
+            }
+            break;
+        case InfectionStatus::kInfected:
+            if (nTicksInStatus_==0) { //infected --> recovered if infectious period has passed
+                infectionStatus_ = InfectionStatus::kRecovered;
+            } else {
+                nTicksInStatus_--; //decrement infected period
+            }
+            break;
+        case InfectionStatus::kRecovered: //increment time in recovered period
+            nTicksInStatus_++;
+            break;
     }
-    
-    if (infectionStatus_ == InfectionStatus::kExposed) {
-        if(nTicksInStatus_ == 0) {
-            auto infectionDuration = gsl_ran_flat(p_randomNumberGenerator, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
-            infectionStatus_ = InfectionStatus::kInfected;
-            nTicksInStatus_=(unsigned int)round(infectionDuration);
-            
-        } else {
-            nTicksInStatus_--;
-        }
-    }
-    
-    if ((infectionStatus_==InfectionStatus::kRecovered) & (nTicksInStatus_>0)) nTicksInStatus_++;
 }
 
 std::ostream &print(std::ostream &p_os, InfectionStatus p_status)
