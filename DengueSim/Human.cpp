@@ -26,21 +26,12 @@ void generateHumans(vector<Location> &p_Locations, vector<Human> *p_Humans, cons
 
 //humansPerLocationNegBinomProb,humansperLocationNegBinomN,randomNumberGenerator
 void generateHumans(vector<Location> &p_Locations, vector<Human> *p_Humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_randomNumberGenerator){
-<<<<<<< HEAD
     int32_t numberOfInhabitantsPerLocation;
     int32_t humanID=0;
     
     for (auto &rLocation : p_Locations) {//reference to individual location
         numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_randomNumberGenerator, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
         for(int32_t i=0; i<numberOfInhabitantsPerLocation; i++) {
-=======
-    int32_t InhabitantsPerLocation;
-    int32_t humanID=0;
-    
-    for (auto &rLocation : p_Locations) {//reference to individual location
-        InhabitantsPerLocation = gsl_ran_negative_binomial(p_randomNumberGenerator, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
-        for(int32_t i=0; i<InhabitantsPerLocation; i++) {
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
             p_Humans->emplace_back(humanID,rLocation); //add single human
             humanID++; //increment human ID
         }
@@ -57,7 +48,6 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
     double randomDrawNumberOfLocations = gsl_ran_gamma(p_randomNumberGenerator, p_randomMovementShape, 1/p_randomMovementRate);
     if (randomDrawNumberOfLocations<=0) randomDrawNumberOfLocations=1;   //visit at least home
     size_t numberOfLocationVisited = (size_t)round(randomDrawNumberOfLocations);
-<<<<<<< HEAD
 
     vector<int32_t> locationsVisited;
     size_t visitIndex=1;
@@ -65,17 +55,6 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
     
     locationsVisited.emplace_back(getHomeLocation().getLocationID()); //add home location to places visited
     
-=======
-    //double randomMovementProbability = randomMovementTheta/(randomMovementTheta+randomMovementMu);
-    //NumberOfLocationVisited = gsl_ran_negative_binomial(prandomNumberGenerator, randomMovementProbability, randomMovementTheta); //determine total number of visited locations
-    
-    vector<int32_t> locationsVisited;
-    size_t visitIndex=1;
-    size_t numberTrials=0; //to avoid endless loop if only few locations are present
-    
-    locationsVisited.emplace_back(GetHomeLocation().getLocationID()); //add home location to places visited
-    
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
     while (visitIndex<numberOfLocationVisited) {
         numberTrials++;
         
@@ -85,11 +64,7 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
             break;
         }
         if(numberOfLocationVisited>=p_Locations->size()) {
-<<<<<<< HEAD
             cout << "Warning: Human " << id_ << " is scheduled to visit " << numberOfLocationVisited << " locations. Only " << p_Locations->size() << " available. ";
-=======
-            cout << "Warning: Human " << id_ << " is scheduled to visit " << numberOfLocationVisited << " locations. Only " << p_Locations->size()-1 << " available. ";
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
             cout << "Sampling terminated." << endl;
             break;
         }
@@ -104,11 +79,7 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
     }
     
     for (size_t i=0; i<locationsVisited.size(); i++) {
-<<<<<<< HEAD
         int32_t locationIndex = locationsVisited[i];
-=======
-        int32_t locationIndex =locationsVisited[i];
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
         (*p_Locations)[locationIndex].registerVisit(*this); //register visit
         
         if(infectionStatus_== InfectionStatus::kSusceptible) { //register potential exposure of susceptibles
@@ -122,26 +93,14 @@ void Human::generateMovement(vector<Location> *p_Locations, gsl_rng *p_randomNum
     }
 }
 
-<<<<<<< HEAD
 void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_randomNumberGenerator){
-=======
-void Human::propagateInfection(const unsigned int MinimumInfectionDuration, const unsigned int MaximumInfectionDuration, gsl_rng *prandomNumberGenerator){
-    //if ((InfectionStatus==1) & (NTicksInStatus>0)) NTicksInStatus--; //decrement exposed period
-    //0 = susceptible, 1 = exposed, 2 = infected, 3 = recovered
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
     if ((infectionStatus_ != InfectionStatus::kSusceptible) & ( infectionStatus_!=InfectionStatus::kRecovered) & (nTicksInStatus_>0)) nTicksInStatus_--; //decrement exposed/infectious period
     if (infectionStatus_ == InfectionStatus::kRecovered) nTicksInStatus_++; //increment recovered period (assuming lifelong immunity)
     
     if ((infectionStatus_==InfectionStatus::kExposed) & (nTicksInStatus_==0)) { //exposed --> infectious
-<<<<<<< HEAD
         auto infectionDuration = gsl_ran_flat(p_randomNumberGenerator, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
         infectionStatus_ = InfectionStatus::kInfected;
         nTicksInStatus_=(unsigned int)round(infectionDuration);
-=======
-        auto InfectionDuration = gsl_ran_flat(prandomNumberGenerator, MinimumInfectionDuration-0.5+1e-7, MaximumInfectionDuration+0.5-1e-7);
-        infectionStatus_ = InfectionStatus::kInfected;
-        nTicksInStatus_=(unsigned int)round(InfectionDuration);
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
     }
     
     if ((infectionStatus_==InfectionStatus::kInfected) & (nTicksInStatus_==0)) { //infectious --> recovered
@@ -150,7 +109,6 @@ void Human::propagateInfection(const unsigned int MinimumInfectionDuration, cons
     }
 }
 
-<<<<<<< HEAD
 std::ostream &print(std::ostream &p_os, InfectionStatus p_status)
 {
     switch (p_status)
@@ -170,25 +128,4 @@ std::ostream &print(std::ostream &p_os, const Human &p_Human){
     p_os << " ";
     p_os << p_Human.nTicksInStatus_;
     return p_os;
-=======
-std::ostream &print(std::ostream &os, InfectionStatus p_status)
-{
-    switch (p_status)
-    {
-        case InfectionStatus::kSusceptible: os << "S"; break;
-        case InfectionStatus::kExposed: os << "E"; break;
-        case InfectionStatus::kInfected: os << "I"; break;
-        case InfectionStatus::kRecovered: os << "R"; break;
-    }
-    return os;
-}
-
-std::ostream &print(std::ostream &os, const Human &rHuman){
-    os << rHuman.id_ << " ";
-    os << rHuman.rhomeLocation_.getLocationID() << " ";
-    print(os, rHuman.infectionStatus_);
-    os << " ";
-    os << rHuman.nTicksInStatus_;
-    return os;
->>>>>>> 6c831185a23d40fc82d23b894f8c6162ea0bb00b
 }
