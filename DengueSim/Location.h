@@ -1,12 +1,12 @@
 //
 //  Location.h
-//  DDv0
+//  DD
 //
-//  Created by Anna Maria on 10/17/22.
+//  Copyright © 2022 Anna Maria Langmüller. All rights reserved.
 //
 
-#ifndef Location_h
-#define Location_h
+#ifndef LOCATION_H
+#define LOCATION_H
 
 #include <iostream>
 #include <string>
@@ -16,45 +16,41 @@
 class Human;
 class Location;
 
+typedef int32_t LocationID;
+
 extern std::ostream &print(std::ostream &p_os, const Location &p_location);
-extern void generateLocations(const int32_t p_locationCount, std::vector<Location> *p_locations);
+extern void generateLocations(const int32_t p_locationCount, std::vector<Location> *p_locations, const long double p_currentRiskScore, const size_t p_historyLength);
 
 class Location {
 friend std::ostream &print(std::ostream &p_os, const Location &p_location);
     
-public:     //constructors
-    //deactivate copy contructor: Location l(l2);
-    Location(const Location&) = delete;
-    //deactivate copy assignment: Location l = l2;
-    Location& operator=(const Location&) = delete;
-    // default move constructor to allow objects to move in memory, such as when std::vector reallocates its buffer
-    Location(Location&&) noexcept = default;
-    explicit Location(const int32_t p_id, size_t p_historyLength=10, std::deque<int32_t> p_visitHistory= {0}, std::deque<long double> p_riskScoreHistory = {0}): id_(p_id), currentvisits_(0), historyLength_(p_historyLength), currentRiskScore_(0), visitHistory_(p_visitHistory), riskScoreHistory_(p_riskScoreHistory)  {};
+public:
+    Location(const Location&) = delete; //deactivate copy contructor: Location l(l2);
+    Location& operator=(const Location&) = delete; //deactivate copy assignment: Location l = l2;
+    Location(Location&&) noexcept = default; //default move constructor to allow objects to move in memory (e.g., when std::vector reallocates its buffer)
     
-    int32_t getLocationID(void) const { return id_; }
-    int32_t getCurrentVisits(void) const { return currentvisits_; }
-    size_t getHistoryLength(void) const {return visitHistory_.size(); }
-    long double getCurrentRiskScore(void) const {return currentRiskScore_;}
-    int32_t accessVisits(int p_i) {return visitHistory_.at(p_i);}
-    long double accessRiskScores(int p_i) {return riskScoreHistory_.at(p_i);}
-    void initiateRiskScore(long double p_riskScore) {
-        currentRiskScore_=p_riskScore;
-        riskScoreHistory_[0]=p_riskScore;
-    }
-    void updateCharacteristics(long double p_currentDiseaseEstablishment);
-    void registerVisit(Human &p_visitor);
+    explicit Location(const LocationID p_id, long double p_riskRcore, size_t p_historyLength): id_(p_id), infectedVisitsCount_(0), historyLength_(p_historyLength), riskScore_(p_riskRcore) {};
+
+    LocationID getLocationID(void) const { return id_; }
+    int32_t getRecentInfectedVisitorsCount(void) const { return infectedVisitsCount_; }
+    size_t getVisitHistoryLength(void) const {return infectedVisitsCountsHistory_.size(); }
+    size_t getRiskScoreHistoryLength(void) const {return riskScoreHistory_.size(); }
+    long double getRecentRiskScore(void) const {return riskScore_;}
+    int32_t infectedVisitsCountAtIndex(int p_i) {return infectedVisitsCountsHistory_.at(p_i);}
+    long double riskScoreAtIndex(int p_i) {return riskScoreHistory_.at(p_i);}
+    void storeRiskScoreAndNumberOfInfectedVisitors(long double p_currentDiseaseEstablishment);
+    void registerInfectiousVisits(Human &p_visitor);
 
     void printRiskScoreHistory(void);
     void printVisitHistory(void);
     
 private:
-    int32_t id_;
-    int32_t currentvisits_; //number of infectious visitors in current tick
-    long double currentRiskScore_; //disease establishment proportion in current tick
-    size_t historyLength_; //length of the visitor history that should be tracked per location
-    std::deque<int32_t> visitHistory_; //visitor history for <HistoryLength> ticks
-    std::deque<long double> riskScoreHistory_; //disease establishment proportion history for <HistoryLength> ticks
+    LocationID id_;
+    int32_t infectedVisitsCount_=0; //number of infectious visitors in current tick
+    long double riskScore_=0; //disease establishment proportion in current tick
+    size_t historyLength_; //length of the infectedVisitsCount_ & riskScore_ history that should be tracked per location
+    std::deque<int32_t> infectedVisitsCountsHistory_ = {infectedVisitsCount_}; //history of infectedVisitsCount_
+    std::deque<long double> riskScoreHistory_ = {riskScore_}; //history of riskScore_
 };
 
-
-#endif /* Location_h */
+#endif /* LOCATION_H */
