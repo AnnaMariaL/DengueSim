@@ -10,122 +10,148 @@
 #include "Human.h"
 #include "Location.h"
 
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCount, const unsigned int p_tickCount) {
+void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCount, const unsigned int p_tickCount)
+{
     //reference to location (will not be changed), pointer to humans (avoid copying)
-    HumanID humanID=0; //initialize human ID
-    unsigned int elapsedTickCount=0;
-    unsigned int remainingTickCount=p_tickCount-elapsedTickCount;
-    for (auto &location : p_locations) {//reference to individual location
-        for(int32_t i=0; i<p_humanCount; i++) {
+    HumanID humanID = 0; //initialize human ID
+    const unsigned int elapsedTickCount = 0;
+    const unsigned int remainingTickCount = p_tickCount - elapsedTickCount;
+    for (auto &location : p_locations) //reference to individual location
+    {
+        for (int32_t i = 0; i < p_humanCount; i++)
+        {
             p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible, elapsedTickCount, remainingTickCount); //add single human
             humanID++; //increment human ID
         }
     }
 }
 
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, unsigned int  p_tickCount, gsl_rng *p_rng){
-    HumanID humanID=0; //initialize human ID
-    unsigned int elapsedTickCount=0;
-    unsigned int remainingTickCount=p_tickCount-elapsedTickCount;
+void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, unsigned int  p_tickCount, gsl_rng *p_rng)
+{
+    HumanID humanID = 0; //initialize human ID
+    unsigned int elapsedTickCount = 0;
+    unsigned int remainingTickCount = p_tickCount - elapsedTickCount;
     int32_t numberOfInhabitantsPerLocation;
-    for (auto &location : p_locations) {//reference to individual location
+    for (auto &location : p_locations) //reference to individual location
+    {
         numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
-        for(int32_t i=0; i<numberOfInhabitantsPerLocation; i++) {
+        for (int32_t i = 0; i < numberOfInhabitantsPerLocation; i++)
+        {
             p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible, elapsedTickCount, remainingTickCount); //add single human
             humanID++; //increment human ID
         }
     }
 }
 
-void Human::initiateInfection(unsigned int p_exposureDuration){
+void Human::initiateInfection(const unsigned int p_exposureDuration)
+{
     infectionStatus_= InfectionStatus::kExposed;
     remainingTicks_ = p_exposureDuration;
     elapsedTicks_ = 0;
 }
 
-void Human::generateMovement(std::vector<Location> *p_locations, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration, gsl_rng *p_rng) {
-    
-    double randomDrawNumberOfLocations = gsl_ran_gamma(p_rng, p_randomMovementShape, 1/p_randomMovementRate);
-    if (randomDrawNumberOfLocations<=0) randomDrawNumberOfLocations=0;
-    size_t numberOfLocationVisited = (size_t)round(randomDrawNumberOfLocations);
+void Human::generateMovement(std::vector<Location> *p_locations, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration, gsl_rng *p_rng)
+{
+    double randomDrawNumberOfLocations = gsl_ran_gamma(p_rng, p_randomMovementShape, 1 / p_randomMovementRate);
+    if (randomDrawNumberOfLocations <= 0)
+        randomDrawNumberOfLocations = 0;
+    const size_t numberOfLocationVisited = (size_t)round(randomDrawNumberOfLocations);
     
     std::vector<LocationID> locationsVisited;
-    size_t visitIndex=1;
-    size_t numberTrials=0; //to avoid endless loop if only few locations are present
+    size_t visitIndex = 1;
+    size_t numberTrials = 0; //to avoid endless loop if only few locations are present
     
     locationsVisited.emplace_back(getHomeLocation().getLocationID()); //add home location to places visited
     
-    while (visitIndex<numberOfLocationVisited) {
+    while (visitIndex < numberOfLocationVisited)
+    {
         numberTrials++;
         
-        if (numberTrials>100*numberOfLocationVisited) {
-            std::cout << "Warning: It took more than "  << numberTrials << " draws to attempt visiting " << numberOfLocationVisited << " locations. ";
-            std::cout << "Sampling terminated for human " << id_ << ". Already sampled places will be visited." << std::endl;
+        if (numberTrials > 100 * numberOfLocationVisited) {
+            std::cerr << "Warning: It took more than "  << numberTrials << " draws to attempt visiting " << numberOfLocationVisited << " locations. ";
+            std::cerr << "Sampling terminated for human " << id_ << ". Already sampled places will be visited." << std::endl;
             break;
         }
-        if(numberOfLocationVisited>=p_locations->size()) {
-            std::cout << "Warning: Human " << id_ << " is scheduled to visit " << numberOfLocationVisited << " locations. Only " << p_locations->size() << " available. ";
-            std::cout << "Sampling terminated." << std::endl;
+        if (numberOfLocationVisited >= p_locations->size()) {
+            std::cerr << "Warning: Human " << id_ << " is scheduled to visit " << numberOfLocationVisited << " locations. Only " << p_locations->size() << " available. ";
+            std::cerr << "Sampling terminated." << std::endl;
             break;
         }
         
-        auto locationIndex = gsl_rng_uniform_int(p_rng, p_locations->size());
-        auto alreadySampled = find(locationsVisited.begin(), locationsVisited.end(), locationIndex);
+        const auto locationIndex = gsl_rng_uniform_int(p_rng, p_locations->size());
+        const auto alreadySampled = find(locationsVisited.begin(), locationsVisited.end(), locationIndex);
         
-        if(alreadySampled==end(locationsVisited)) {
+        if (alreadySampled == end(locationsVisited)) {
             locationsVisited.emplace_back(locationIndex);
             visitIndex++;
         }
     }
     
-    for (size_t i=0; i<locationsVisited.size(); i++) {
-        LocationID locationIndex = locationsVisited[i];
+    for (size_t i = 0; i < locationsVisited.size(); i++)
+    {
+        const LocationID locationIndex = locationsVisited[i];
         (*p_locations)[locationIndex].registerInfectiousVisits(*this); //register infectious visit
         
-        if(infectionStatus_== InfectionStatus::kSusceptible) { //register potential exposure of susceptibles
-            int32_t infectiousVisits = (*p_locations)[locationIndex].infectedVisitsCountAtIndex(0);
-            long double diseaseEstablishment = (*p_locations)[locationIndex].riskScoreAtIndex(0);
-            for (int j=0; j<infectiousVisits; j++) {
-                double infectionProbability = gsl_ran_flat(p_rng, 0 , 1);
-                if (infectionProbability<diseaseEstablishment) initiateInfection(p_exposureDuration);
+        if (infectionStatus_== InfectionStatus::kSusceptible) //register potential exposure of susceptibles
+        {
+            const int32_t infectiousVisits = (*p_locations)[locationIndex].infectedVisitsCountNTicksAgo(0);
+            const double diseaseEstablishment = (*p_locations)[locationIndex].riskScoreNTicksAgo(0);
+            for (int j = 0; j < infectiousVisits; j++) {
+                const double infectionProbability = gsl_ran_flat(p_rng, 0 , 1);
+                if (infectionProbability < diseaseEstablishment) initiateInfection(p_exposureDuration);
             }
         }
     }
 }
 
-void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, unsigned int p_remainingTicksInSimulation, gsl_rng *p_rng){
-
-    switch (infectionStatus_) {
+void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_rng)
+{
+    switch (infectionStatus_)
+    {
         case InfectionStatus::kSusceptible:
             elapsedTicks_++;
-            remainingTicks_--;
             break;
         case InfectionStatus::kExposed:
-            if(remainingTicks_ == 0) { //exposed --> infected if exposed period has passed
-                auto infectionDuration = gsl_ran_flat(p_rng, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
+            if (remainingTicks_ == 0) //exposed --> infected if exposed period has passed
+            {
+                auto infectionDuration = gsl_rng_uniform_int(p_rng, (p_maximumInfectionDuration-p_minimumInfectionDuration+1));
+                infectionDuration = infectionDuration + p_minimumInfectionDuration;
+                //auto infectionDuration = gsl_ran_flat(p_rng, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
                 infectionStatus_ = InfectionStatus::kInfected;
                 elapsedTicks_ = 0;
-                remainingTicks_ = (unsigned int) round(infectionDuration);
-            } else { //decrement exposed period
+                remainingTicks_ = (unsigned int)infectionDuration;
+            }
+            else
+            { //decrement exposed period
                 elapsedTicks_++;
                 remainingTicks_--;
             }
             break;
         case InfectionStatus::kInfected:
-            if (remainingTicks_ == 0) { //infected --> recovered if infectious period has passed
+            if (remainingTicks_ == 0) //infected --> recovered if infectious period has passed
+            {
                 infectionStatus_ = InfectionStatus::kRecovered;
                 elapsedTicks_ = 0;
-                remainingTicks_ = p_remainingTicksInSimulation;
-            } else {
+            }
+            else
+            {
                 elapsedTicks_++;
                 remainingTicks_--;
             }
             break;
         case InfectionStatus::kRecovered:
             elapsedTicks_++;
-            remainingTicks_--;
             break;
     }
+}
+
+unsigned int Human::getRemainingTicksInStatus(void) const {
+    if ((infectionStatus_ == InfectionStatus::kSusceptible) || (infectionStatus_ == InfectionStatus::kRecovered))
+    {
+        std::cerr << "getRemainingTicksInStatus() called in non-informative state" << std::endl;
+        throw std::domain_error("getRemainingTicksInStatus() called in non-informative state");
+    }
+    return remainingTicks_;
 }
 
 std::ostream &print(std::ostream &p_os, const InfectionStatus p_status)

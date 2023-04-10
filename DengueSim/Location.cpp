@@ -17,29 +17,36 @@ std::ostream &print(std::ostream &p_os, const Location &p_location)
     return p_os;
 }
 
-void generateLocations(const int32_t p_locationCount, std::vector<Location> *p_locations, const long double p_currentRiskScore, const size_t p_historyLength) { //use pointer to locations to avoid copying
-    for(int32_t i=0; i<p_locationCount; i++)
-        p_locations->emplace_back(i, p_currentRiskScore, p_historyLength);
+void generateLocations(const int32_t p_locationCount, std::vector<Location> *p_locations, const double p_currentRiskScore, const size_t p_numberTicksToTrack)
+{ //use pointer to locations to avoid copying
+    for (int32_t i=0; i<p_locationCount; i++)
+        p_locations->emplace_back(i, p_currentRiskScore, p_numberTicksToTrack);
 }
 
-void Location::registerInfectiousVisits(Human &p_visitor) {
-    if((p_visitor.getInfectionStatus()==InfectionStatus::kInfected) & (p_visitor.getRemainingTicksInStatus()>0)) infectedVisitsCount_++; //count infectious visits
+void Location::registerInfectiousVisits(Human &p_visitor)
+{
+    if ((p_visitor.getInfectionStatus() == InfectionStatus::kInfected) && (p_visitor.getRemainingTicksInStatus() > 0))
+        infectedVisitsCount_++; //count infectious visits
 }
 
-void Location::storeRiskScoreAndNumberOfInfectedVisitors(long double p_currentDiseaseEstablishment) {
+void Location::storeRiskScoreAndNumberOfInfectedVisitors(double p_currentDiseaseEstablishment)
+{
     infectedVisitsCountsHistory_.push_front(infectedVisitsCount_); //add recent infectious visits count to deque
     riskScoreHistory_.push_front(riskScore_); //add recent risk score to deque
     
-    if(infectedVisitsCountsHistory_.size()>historyLength_) infectedVisitsCountsHistory_.resize(historyLength_); //resize deque if necessary
-    if(riskScoreHistory_.size()>historyLength_) riskScoreHistory_.resize(historyLength_); //resize deque if necessary
+    if (infectedVisitsCountsHistory_.size() > numberTicksToTrack_)
+        infectedVisitsCountsHistory_.resize(numberTicksToTrack_); //resize deque if necessary
+    if (riskScoreHistory_.size() > numberTicksToTrack_)
+        riskScoreHistory_.resize(numberTicksToTrack_); //resize deque if necessary
     
-    infectedVisitsCount_=0; //reset infectedVisitsCount_
+    infectedVisitsCount_ = 0; //reset infectedVisitsCount_
     riskScore_ = p_currentDiseaseEstablishment; //update riskScore_
 }
 
-void Location::printRiskScoreHistory(void){
-    if(!riskScoreHistory_.empty()) {
-        for(std::deque<long double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) std::cout << " " << *it ;
+void Location::printRiskScoreHistory(void)
+{
+    if (!riskScoreHistory_.empty()) {
+        for(std::deque<double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) std::cout << " " << *it ;
         std::cout << std::endl;
     } else {
         std::cout << "Empty riskScoreHistory_." << std::endl;

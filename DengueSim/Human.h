@@ -47,19 +47,19 @@ public:
     Human(const HumanID p_humanID, Location &p_homeLocation, unsigned int p_remainingTicksInStatus): Human(p_humanID, p_homeLocation, InfectionStatus::kSusceptible, 0, p_remainingTicksInStatus) {}
     
     const Location &getHomeLocation(void) const { return homeLocation_; }
-    InfectionStatus getInfectionStatus(void) { return infectionStatus_; }
-    unsigned int getRemainingTicksInStatus(void) { return remainingTicks_; }
-    unsigned int getElapsedTicksInStatus(void) { return elapsedTicks_; }
-    HumanID getID( void) {return id_; }
-    void initiateInfection(unsigned int p_exposureDuration);
+    InfectionStatus getInfectionStatus(void) const { return infectionStatus_; }
+    unsigned int getRemainingTicksInStatus(void) const;
+    unsigned int getElapsedTicksInStatus(void) const { return elapsedTicks_; }
+    HumanID getID( void) const {return id_; }
+    void initiateInfection(const unsigned int p_exposureDuration);
     void generateMovement(std::vector<Location> *p_locations, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration, gsl_rng *p_rng);
-    void propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, unsigned int p_remainingTicksInSimulation, gsl_rng *p_rng);
+    void propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_rng);
     
 private:
     HumanID id_;
     Location &homeLocation_; //reference, because home is not changing & must not be a null ptr.
     InfectionStatus infectionStatus_ = InfectionStatus::kSusceptible;
-    unsigned int remainingTicks_ = 0; //remaining ticks in infectionStatus_
+    unsigned int remainingTicks_; //remaining ticks in infectionStatus_
     unsigned int elapsedTicks_ = 0; //elapsed ticks in infectionStatus_
 };
 
