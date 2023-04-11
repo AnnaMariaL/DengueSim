@@ -10,34 +10,30 @@
 #include "Human.h"
 #include "Location.h"
 
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCount, const unsigned int p_tickCount)
+void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCountToAdd)
 {
     //reference to location (will not be changed), pointer to humans (avoid copying)
     HumanID humanID = 0; //initialize human ID
-    const unsigned int elapsedTickCount = 0;
-    const unsigned int remainingTickCount = p_tickCount - elapsedTickCount;
     for (auto &location : p_locations) //reference to individual location
     {
-        for (int32_t i = 0; i < p_humanCount; i++)
+        for (int32_t i = 0; i < p_humanCountToAdd; i++)
         {
-            p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible, elapsedTickCount, remainingTickCount); //add single human
+            p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible); //add single human
             humanID++; //increment human ID
         }
     }
 }
 
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, unsigned int  p_tickCount, gsl_rng *p_rng)
+void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng)
 {
     HumanID humanID = 0; //initialize human ID
-    unsigned int elapsedTickCount = 0;
-    unsigned int remainingTickCount = p_tickCount - elapsedTickCount;
     int32_t numberOfInhabitantsPerLocation;
     for (auto &location : p_locations) //reference to individual location
     {
         numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
         for (int32_t i = 0; i < numberOfInhabitantsPerLocation; i++)
         {
-            p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible, elapsedTickCount, remainingTickCount); //add single human
+            p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible); //add single human
             humanID++; //increment human ID
         }
     }
@@ -67,12 +63,14 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
     {
         numberTrials++;
         
-        if (numberTrials > 100 * numberOfLocationVisited) {
+        if (numberTrials > 100 * numberOfLocationVisited)
+        {
             std::cerr << "Warning: It took more than "  << numberTrials << " draws to attempt visiting " << numberOfLocationVisited << " locations. ";
             std::cerr << "Sampling terminated for human " << id_ << ". Already sampled places will be visited." << std::endl;
             break;
         }
-        if (numberOfLocationVisited >= p_locations->size()) {
+        if (numberOfLocationVisited >= p_locations->size())
+        {
             std::cerr << "Warning: Human " << id_ << " is scheduled to visit " << numberOfLocationVisited << " locations. Only " << p_locations->size() << " available. ";
             std::cerr << "Sampling terminated." << std::endl;
             break;
@@ -92,11 +90,13 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
         const LocationID locationIndex = locationsVisited[i];
         (*p_locations)[locationIndex].registerInfectiousVisits(*this); //register infectious visit
         
-        if (infectionStatus_== InfectionStatus::kSusceptible) //register potential exposure of susceptibles
+        if (infectionStatus_ == InfectionStatus::kSusceptible) //register potential exposure of susceptibles
         {
             const int32_t infectiousVisits = (*p_locations)[locationIndex].infectedVisitsCountNTicksAgo(0);
             const double diseaseEstablishment = (*p_locations)[locationIndex].riskScoreNTicksAgo(0);
-            for (int j = 0; j < infectiousVisits; j++) {
+            
+            for (int j = 0; j < infectiousVisits; j++)
+            {
                 const double infectionProbability = gsl_ran_flat(p_rng, 0 , 1);
                 if (infectionProbability < diseaseEstablishment) initiateInfection(p_exposureDuration);
             }
@@ -116,7 +116,7 @@ void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, co
             {
                 auto infectionDuration = gsl_rng_uniform_int(p_rng, (p_maximumInfectionDuration-p_minimumInfectionDuration+1));
                 infectionDuration = infectionDuration + p_minimumInfectionDuration;
-                //auto infectionDuration = gsl_ran_flat(p_rng, p_minimumInfectionDuration-0.5+1e-7, p_maximumInfectionDuration+0.5-1e-7);
+                
                 infectionStatus_ = InfectionStatus::kInfected;
                 elapsedTicks_ = 0;
                 remainingTicks_ = (unsigned int)infectionDuration;
@@ -166,7 +166,8 @@ std::ostream &print(std::ostream &p_os, const InfectionStatus p_status)
     return p_os;
 }
 
-std::ostream &print(std::ostream &p_os, const Human &p_human){
+std::ostream &print(std::ostream &p_os, const Human &p_human)
+{
     p_os << p_human.id_ << " ";
     p_os << p_human.homeLocation_.getLocationID() << " ";
     print(p_os, p_human.infectionStatus_) << " ";

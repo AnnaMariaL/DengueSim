@@ -31,26 +31,26 @@ typedef int32_t HumanID;
 extern std::ostream &print(std::ostream &p_os, const InfectionStatus p_status);
 extern std::ostream &print(std::ostream &p_os, const Human &p_human);
 
-extern void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCount, const unsigned int p_tickCount);
+extern void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCountToAdd);
 
-extern void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, const unsigned int p_tickCount, gsl_rng *p_rng);
+extern void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng);
 
 class Human {
 friend std::ostream &print(std::ostream &p_os, const Human &p_human);
 
 public:
     Human(const Human&) = delete; //deactivate copy constructor: Human h(h12);
-    Human& operator=(const Human&) = delete; //deactivate copy assignment: Human h = h2;
+    Human& operator = (const Human&) = delete; //deactivate copy assignment: Human h = h2;
     Human(Human&&) noexcept = default;  //default move constructor to allow objects to move in memory (e.g., when std::vector reallocates its buffer)
     
-    Human(const HumanID p_humanID, Location &p_homeLocation, InfectionStatus p_infectionStatus, unsigned int p_elapsedTicksInStatus, unsigned int p_remainingTicksInStatus): id_(p_humanID), homeLocation_(p_homeLocation), infectionStatus_(p_infectionStatus), elapsedTicks_(p_elapsedTicksInStatus), remainingTicks_(p_remainingTicksInStatus){}
-    Human(const HumanID p_humanID, Location &p_homeLocation, unsigned int p_remainingTicksInStatus): Human(p_humanID, p_homeLocation, InfectionStatus::kSusceptible, 0, p_remainingTicksInStatus) {}
+    Human(const HumanID p_humanID, Location &p_homeLocation, InfectionStatus p_infectionStatus): id_(p_humanID), homeLocation_(p_homeLocation), infectionStatus_(p_infectionStatus) {}
+    Human(const HumanID p_humanID, Location &p_homeLocation): Human(p_humanID, p_homeLocation, InfectionStatus::kSusceptible) {}
     
     const Location &getHomeLocation(void) const { return homeLocation_; }
     InfectionStatus getInfectionStatus(void) const { return infectionStatus_; }
     unsigned int getRemainingTicksInStatus(void) const;
     unsigned int getElapsedTicksInStatus(void) const { return elapsedTicks_; }
-    HumanID getID( void) const {return id_; }
+    HumanID getID(void) const {return id_; }
     void initiateInfection(const unsigned int p_exposureDuration);
     void generateMovement(std::vector<Location> *p_locations, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration, gsl_rng *p_rng);
     void propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_rng);

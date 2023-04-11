@@ -17,15 +17,15 @@ std::ostream &print(std::ostream &p_os, const Location &p_location)
     return p_os;
 }
 
-void generateLocations(const int32_t p_locationCount, std::vector<Location> *p_locations, const double p_currentRiskScore, const size_t p_numberTicksToTrack)
+void generateLocations(const int32_t p_locationCountToAdd, std::vector<Location> *p_locations, const double p_currentRiskScore, const size_t p_numberTicksToTrack)
 { //use pointer to locations to avoid copying
-    for (int32_t i=0; i<p_locationCount; i++)
+    for (int32_t i = 0; i < p_locationCountToAdd; i++)
         p_locations->emplace_back(i, p_currentRiskScore, p_numberTicksToTrack);
 }
 
 void Location::registerInfectiousVisits(Human &p_visitor)
 {
-    if ((p_visitor.getInfectionStatus() == InfectionStatus::kInfected) && (p_visitor.getRemainingTicksInStatus() > 0))
+    if ( (p_visitor.getInfectionStatus() == InfectionStatus::kInfected) && (p_visitor.getRemainingTicksInStatus() > 0) )
         infectedVisitsCount_++; //count infectious visits
 }
 
@@ -46,7 +46,7 @@ void Location::storeRiskScoreAndNumberOfInfectedVisitors(double p_currentDisease
 void Location::printRiskScoreHistory(void)
 {
     if (!riskScoreHistory_.empty()) {
-        for(std::deque<double>::iterator it = riskScoreHistory_.begin(); it!=riskScoreHistory_.end(); ++it) std::cout << " " << *it ;
+        for (std::deque<double>::iterator it = riskScoreHistory_.begin(); it != riskScoreHistory_.end(); ++it) std::cout << " " << *it;
         std::cout << std::endl;
     } else {
         std::cout << "Empty riskScoreHistory_." << std::endl;

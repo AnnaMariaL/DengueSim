@@ -140,13 +140,13 @@ int main(int argc, const char * argv[])
     std::vector<Location> locations; //empty vector location
     std::vector<Human> humans; //empty vector humans
     
-    const int32_t locationCount = 1000; //total number of locations
+    const int32_t locationCountToAdd = 1000; //total number of locations
     const unsigned int numberTicks = 365 ; //total number of simulated ticks
     const size_t numberTicksToTrackInDeque = 10; //deque size for infectedVisitCount and riskScore
     const double humansPerLocationNegBinomProb = 0.594; //0.5939354, Reiner et al. (2014)
     const double humansPerLocationNegBinomN = 9.01; //9.01, Reiner et al. (2014)
     const unsigned int exposureDuration = 0; //infection parameters
-    const double startValueDiseaseEstablishment = diseaseEstablishment*(1+ seasonalityCoefficient * std::cos(2*M_PI*(0-numberTicks/2)/numberTicks)); //set disease establishment proportion
+    const double startValueDiseaseEstablishment = diseaseEstablishment * (1+ seasonalityCoefficient * std::cos(2 * M_PI*(0 - numberTicks/2) / numberTicks)); //set disease establishment proportion
     
     const gsl_rng_type *randomNumberType; //build random number generator (GSL library)
     gsl_rng *rng;
@@ -157,22 +157,23 @@ int main(int argc, const char * argv[])
     
     std::ofstream myfile;
     myfile.open(outputFile);
-    if (!myfile.is_open()) {
+    if (!myfile.is_open())
+    {
        std::cerr << "Can not open file";
         return -1;
      }
     
     system("pwd");
     
-    generateLocations(locationCount, &locations, startValueDiseaseEstablishment, numberTicksToTrackInDeque); //set up locations (use pointer to avoid copying)
-    generateHumans(locations, &humans, humansPerLocationNegBinomProb, humansPerLocationNegBinomN, numberTicks, rng); //set up humans, # of humans per location ~ nbinom
+    generateLocations(locationCountToAdd, &locations, startValueDiseaseEstablishment, numberTicksToTrackInDeque); //set up locations (use pointer to avoid copying)
+    generateHumans(locations, &humans, humansPerLocationNegBinomProb, humansPerLocationNegBinomN, rng); //set up humans, # of humans per location ~ nbinom
     
     const auto infectionSeed = gsl_rng_uniform_int(rng, humans.size()); //seed infection via an exposed individual
     humans[infectionSeed].initiateInfection(exposureDuration);
     
     for (unsigned int currentTick=1; currentTick<=numberTicks; currentTick++)
     {//for each tick
-        const double currentDiseaseEstablishment = diseaseEstablishment*(1+ seasonalityCoefficient * std::cos(2*M_PI*(currentTick-numberTicks/2)/numberTicks)); //calculate current disease establishment proportion
+        const double currentDiseaseEstablishment = diseaseEstablishment * (1 + seasonalityCoefficient * std::cos(2 * M_PI * (currentTick - numberTicks/2) / numberTicks)); //calculate current disease establishment proportion
         
         for (auto &human : humans)
             human.generateMovement(&locations, randomMovementShape, randomMovementRate, exposureDuration, rng); //generate movement
