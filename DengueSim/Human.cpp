@@ -104,7 +104,7 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
     }
 }
 
-void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_rng)
+void Human::propagateInfection(const double p_infectionDuration, gsl_rng *p_rng)
 {
     switch (infectionStatus_)
     {
@@ -114,8 +114,12 @@ void Human::propagateInfection(const unsigned int p_minimumInfectionDuration, co
         case InfectionStatus::kExposed:
             if (remainingTicks_ == 0) //exposed --> infected if exposed period has passed
             {
-                auto infectionDuration = gsl_rng_uniform_int(p_rng, (p_maximumInfectionDuration-p_minimumInfectionDuration+1));
-                infectionDuration = infectionDuration + p_minimumInfectionDuration;
+                
+                double p = p_infectionDuration - floor(p_infectionDuration);
+                double probabilities[] = {1 - p, p};  //calculate probabilities
+                gsl_ran_discrete_t* dist = gsl_ran_discrete_preproc(2, probabilities);
+                auto infectionDuration = floor(p_infectionDuration) + gsl_ran_discrete(p_rng, dist);
+                gsl_ran_discrete_free(dist);
                 
                 infectionStatus_ = InfectionStatus::kInfected;
                 elapsedTicks_ = 0;

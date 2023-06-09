@@ -58,6 +58,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-infectionDuration 3"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-alphaSeasonality 0"
             isEnabled = "YES">
          </CommandLineArgument>
@@ -70,15 +74,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 0.025"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-minInfectionDuration 2"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-maxInfectionDuration 5"
+            argument = "-alpha 0.02"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

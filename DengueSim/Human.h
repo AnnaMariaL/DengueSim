@@ -53,7 +53,7 @@ public:
     HumanID getID(void) const {return id_; }
     void initiateInfection(const unsigned int p_exposureDuration);
     void generateMovement(std::vector<Location> *p_locations, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration, gsl_rng *p_rng);
-    void propagateInfection(const unsigned int p_minimumInfectionDuration, const unsigned int p_maximumInfectionDuration, gsl_rng *p_rng);
+    void propagateInfection(const double p_infectionDuration, gsl_rng *p_rng);
     
 private:
     HumanID id_;

@@ -20,8 +20,7 @@
 int main(int argc, const char * argv[])
 {
     long int argv_randomSeed = 42;
-    unsigned int argv_minimumInfectionDuration = 2; //minimum duration of infectiousness (in number of ticks)
-    unsigned int argv_maximumInfectionDuration = 5; //maximum duration of infectiousness (in number of ticks)
+    double argv_infectionDuration = 2.55; //average duration of infectiousness (in number of ticks)
     double argv_diseaseEstablishment = 0.025; // baseline disease establishment proportion
     double argv_seasonalityCoefficient = 0; // strength of seasonality
     double argv_randomMovementShape = 8.18; // 8.18 estimated from Schaber et al. (2019)
@@ -43,28 +42,16 @@ int main(int argc, const char * argv[])
             std::cout << "-seed set to " << argv_randomSeed << std::endl;
         }
         
-        if (strcmp(argv[arg], "-minInfectionDuration") == 0) //minimum duration of infectious period
+        if (strcmp(argv[arg], "-infectionDuration") == 0) //minimum duration of infectious period
         {
             if (arg == argc - 1)
             {
-                std::cerr << "missing argument for -minInfectionDuration!";
+                std::cerr << "missing argument for -infectionDuration!";
                 exit(1);
             }
-            argv_minimumInfectionDuration = std::stoi(argv[arg+1]);
+            argv_infectionDuration = std::stof(argv[arg+1]);
             arg++;
-            std::cout << "-minInfectionDuration set to " << argv_minimumInfectionDuration << std::endl;
-        }
-        
-        if (strcmp(argv[arg], "-maxInfectionDuration") == 0) //maximum duration of infectious period
-        {
-            if (arg == argc - 1)
-            {
-                std::cerr << "missing argument for -maxInfectionDuration!";
-                exit(1);
-            }
-            argv_maximumInfectionDuration = std::stoi(argv[arg+1]);
-            arg++;
-            std::cout << "-maxInfectionDuration set to " << argv_maximumInfectionDuration << std::endl;
+            std::cout << "-infectionDuration set to " << argv_infectionDuration << std::endl;
         }
         
         if (strcmp(argv[arg], "-alpha") == 0) //baseline disease establishment proportion
@@ -129,8 +116,7 @@ int main(int argc, const char * argv[])
     }
     
     const long int randomSeed = argv_randomSeed; //variables from argument parser
-    const unsigned int minimumInfectionDuration = argv_minimumInfectionDuration;
-    const unsigned int maximumInfectionDuration = argv_maximumInfectionDuration;
+    const double infectionDuration = argv_infectionDuration;
     const double diseaseEstablishment = argv_diseaseEstablishment;
     const double seasonalityCoefficient = argv_seasonalityCoefficient;
     const double randomMovementShape = argv_randomMovementShape;
@@ -140,7 +126,7 @@ int main(int argc, const char * argv[])
     std::vector<Location> locations; //empty vector location
     std::vector<Human> humans; //empty vector humans
     
-    const int32_t locationCountToAdd = 1000; //total number of locations
+    const int32_t locationCountToAdd = 10000; //total number of locations
     const unsigned int numberTicks = 365 ; //total number of simulated ticks
     const size_t numberTicksToTrackInDeque = 10; //deque size for infectedVisitCount and riskScore
     const double humansPerLocationNegBinomProb = 0.594; //0.5939354, Reiner et al. (2014)
@@ -173,20 +159,18 @@ int main(int argc, const char * argv[])
     
     for (unsigned int currentTick=1; currentTick<=numberTicks; currentTick++)
     {//for each tick
-        const double currentDiseaseEstablishment = diseaseEstablishment * (1 + seasonalityCoefficient * std::cos(2 * M_PI * (currentTick - numberTicks/2) / numberTicks)); //calculate current disease establishment proportion
-        
+        const double currentDiseaseEstablishment = diseaseEstablishment * ( 1 +  seasonalityCoefficient * std::cos(2 * M_PI * currentTick/numberTicks)); //calculate current disease establishment proportion
         for (auto &human : humans)
             human.generateMovement(&locations, randomMovementShape, randomMovementRate, exposureDuration, rng); //generate movement
         for (auto &location : locations)
             location.storeRiskScoreAndNumberOfInfectedVisitors(currentDiseaseEstablishment);//update disease establishment proportion & number of infected visits per location
         for (auto &human : humans)
-            human.propagateInfection(minimumInfectionDuration, maximumInfectionDuration, rng); //update infection status
+            human.propagateInfection(infectionDuration, rng); //update infection status
         
         auto susceptibleCount = count_if(humans.begin(), humans.end(), [](Human &human) {return human.getInfectionStatus() == InfectionStatus::kSusceptible;}); //generate output
         auto exposedCount = count_if(humans.begin(), humans.end(), [](Human &human) {return human.getInfectionStatus() == InfectionStatus::kExposed;});
         auto infectedCount = count_if(humans.begin(), humans.end(), [](Human &human) {return human.getInfectionStatus() == InfectionStatus::kInfected;});
         auto recoveredCount = count_if(humans.begin(), humans.end(), [](Human &human) {return human.getInfectionStatus() == InfectionStatus::kRecovered;});
-        
         myfile << currentTick << "\t" << susceptibleCount << "\t" << exposedCount << "\t" << infectedCount << "\t" << recoveredCount << std::endl;
     }
     
