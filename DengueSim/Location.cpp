@@ -19,6 +19,7 @@ std::ostream &print(std::ostream &p_os, const Location &p_location)
 
 void generateLocations(const int32_t p_locationCountToAdd, std::vector<Location> *p_locations, const double p_currentRiskScore, const size_t p_numberTicksToTrack)
 { //use pointer to locations to avoid copying
+    
     for (int32_t i = 0; i < p_locationCountToAdd; i++)
         p_locations->emplace_back(i, p_currentRiskScore, p_numberTicksToTrack);
 }

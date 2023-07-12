@@ -31,8 +31,9 @@ public:
     Location(Location&&) noexcept = default; //default move constructor to allow objects to move in memory (e.g., when std::vector reallocates its buffer)
     
     explicit Location(const LocationID p_id, double p_riskRcore, size_t p_numberTicksToTrack): id_(p_id), infectedVisitsCount_(0), numberTicksToTrack_(p_numberTicksToTrack), riskScore_(p_riskRcore), infectedVisitsCountsHistory_({infectedVisitsCount_}), riskScoreHistory_({riskScore_}) {};
-
+    //, const LocationID p_idSocialGroup
     LocationID getLocationID(void) const { return id_; }
+    //LocationID getSocialGroupID(void) const { return idSocialGroup_; }
     int32_t getRecentInfectedVisitorsCount(void) const { return infectedVisitsCount_; }
     size_t getVisitHistoryLength(void) const {return infectedVisitsCountsHistory_.size(); }
     size_t getRiskScoreHistoryLength(void) const {return riskScoreHistory_.size(); }

@@ -9,34 +9,51 @@
 #include <algorithm>
 #include "Human.h"
 #include "Location.h"
+#include "SocialGroup.h"
 
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const int32_t p_humanCountToAdd)
-{
-    //reference to location (will not be changed), pointer to humans (avoid copying)
-    HumanID humanID = 0; //initialize human ID
-    for (auto &location : p_locations) //reference to individual location
-    {
-        for (int32_t i = 0; i < p_humanCountToAdd; i++)
-        {
-            p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible); //add single human
-            humanID++; //increment human ID
-        }
-    }
-}
-
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng)
+void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng, unsigned int p_locationsPerSocialGroup, std::vector<SocialGroup> *p_socialGroups)
 {
     HumanID humanID = 0; //initialize human ID
-    int32_t numberOfInhabitantsPerLocation;
-    for (auto &location : p_locations) //reference to individual location
+    int32_t socialGroupCount = (int32_t)std::ceil((double)p_locations.size() / p_locationsPerSocialGroup); //determine social group count
+    
+    p_socialGroups->reserve(socialGroupCount);      // allocate the right size up front, so it doesn't move!
+    
+    for (SocialGroupID group_id = 0; group_id < socialGroupCount; group_id++)
     {
-        numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
-        for (int32_t i = 0; i < numberOfInhabitantsPerLocation; i++)
+        p_socialGroups->emplace_back(group_id); //add new social group to vector p_socialGroups
+        SocialGroup &socialGroup = p_socialGroups->back(); //retrieve current social group
+        
+        //std::cout << "new sociaslgroup with id " << group_id << ": " << socialGroup.getID() << " (" << (&socialGroup) << ")" << std::endl;
+        
+        for (int32_t j = 0; j < p_locationsPerSocialGroup; j++) //add p_locationsPerSocialGroup to current social group
         {
-            p_humans->emplace_back(humanID, location, InfectionStatus::kSusceptible); //add single human
-            humanID++; //increment human ID
+            size_t location_index = group_id * p_locationsPerSocialGroup + j;
+            
+            if (location_index < p_locations.size()) //avoid index out of bounds
+            {
+                Location &location = p_locations[location_index];
+                
+                socialGroup.AddLocation(location);
+                
+                int32_t numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
+                if (numberOfInhabitantsPerLocation == 0) //at least one inhabitant per location
+                    numberOfInhabitantsPerLocation = 1; //redraw (do --> while)
+                
+                for (int32_t i = 0; i < numberOfInhabitantsPerLocation; i++)
+                {
+                    p_humans->emplace_back(humanID, location, socialGroup, InfectionStatus::kSusceptible); //add single human
+                    humanID++; //increment human ID
+                }
+            }
         }
     }
+    
+    // DEBUG
+    //for (SocialGroupID group_id = 0; group_id < socialGroupCount; group_id++)
+    //{
+      //  SocialGroup &socialGroup = (*p_socialGroups)[group_id];
+       // std::cout << "post-init: " << socialGroup.getID() << " (" << &socialGroup << ")" << std::endl;
+   // }
 }
 
 void Human::initiateInfection(const unsigned int p_exposureDuration)
@@ -46,59 +63,76 @@ void Human::initiateInfection(const unsigned int p_exposureDuration)
     elapsedTicks_ = 0;
 }
 
-void Human::generateMovement(std::vector<Location> *p_locations, const double p_randomMovementShape, const double p_randomMovementRate, const unsigned int p_exposureDuration, gsl_rng *p_rng)
+void Human::generateMovement(std::vector<Location> *p_locations, const double p_avgNumberVisits, const double p_varNumberVisits, const unsigned int p_exposureDuration, const double p_proportionSocialVisits, gsl_rng *p_rng)
 {
-    double randomDrawNumberOfLocations = gsl_ran_gamma(p_rng, p_randomMovementShape, 1 / p_randomMovementRate);
-    if (randomDrawNumberOfLocations <= 0)
-        randomDrawNumberOfLocations = 0;
-    const size_t numberOfLocationVisited = (size_t)round(randomDrawNumberOfLocations);
-    
-    std::vector<LocationID> locationsVisited;
-    size_t visitIndex = 1;
-    size_t numberTrials = 0; //to avoid endless loop if only few locations are present
-    
-    locationsVisited.emplace_back(getHomeLocation().getLocationID()); //add home location to places visited
-    
-    while (visitIndex < numberOfLocationVisited)
-    {
-        numberTrials++;
-        
-        if (numberTrials > 100 * numberOfLocationVisited)
-        {
-            std::cerr << "Warning: It took more than "  << numberTrials << " draws to attempt visiting " << numberOfLocationVisited << " locations. ";
-            std::cerr << "Sampling terminated for human " << id_ << ". Already sampled places will be visited." << std::endl;
-            break;
-        }
-        if (numberOfLocationVisited >= p_locations->size())
-        {
-            std::cerr << "Warning: Human " << id_ << " is scheduled to visit " << numberOfLocationVisited << " locations. Only " << p_locations->size() << " available. ";
-            std::cerr << "Sampling terminated." << std::endl;
-            break;
-        }
-        
-        const auto locationIndex = gsl_rng_uniform_int(p_rng, p_locations->size());
-        const auto alreadySampled = find(locationsVisited.begin(), locationsVisited.end(), locationIndex);
-        
-        if (alreadySampled == end(locationsVisited)) {
-            locationsVisited.emplace_back(locationIndex);
-            visitIndex++;
-        }
+    double randomMovementRate = p_avgNumberVisits/p_varNumberVisits;
+    double randomMovementShape = p_avgNumberVisits * p_avgNumberVisits / p_varNumberVisits;
+    double randomDrawNumberOfLocations = gsl_ran_gamma(p_rng, randomMovementShape, 1 / randomMovementRate);
+    const size_t numberOfLocationsVisited = (size_t)std::round(randomDrawNumberOfLocations);
+    std::vector<Location *> socialGroupLocations = getSocialGroup().Locations(); //social group = a vector of pointers to location objects
+
+    if (numberOfLocationsVisited >= p_locations->size()) { //avoid endless loops if too few locations are present
+        std::cerr << "Too many locations for location buffer. Sampling terminated." << std::endl;
+        exit(1);
+    }
+    if ((numberOfLocationsVisited >= socialGroupLocations.size()) && (p_proportionSocialVisits >= 1.0)) { //avoid endless loop if too few locations in social group
+        std::cerr << "Too many locations for social group. Sampling terminated." << std::endl;
+        exit(1);
     }
     
-    for (size_t i = 0; i < locationsVisited.size(); i++)
+    std::vector<Location *> whereWillIGo; //whereWillIGo = vector of pointers to location objects
+    whereWillIGo.emplace_back(&getHomeLocation()); //always visit home; getHomeLocation() returns a reference, but we need the address of the home Location instance --> &getHomeLocation()
+    
+    size_t placesVisited = 1;
+    
+    while (placesVisited < numberOfLocationsVisited) {
+        size_t trialCount = 0;
+        const double isSocialGroupVisit = gsl_rng_uniform(p_rng); //visit inside/outside of social group
+        
+        do {
+            if (++trialCount >= 100 * numberOfLocationsVisited) { //avoid endless loops
+                std::cerr << "Too many trials. Sampling terminated" << std::endl;
+                exit(1);
+            }
+            
+            if (isSocialGroupVisit < p_proportionSocialVisits) { //social visit
+                const auto sampledLocationIndex = gsl_rng_uniform_int(p_rng, socialGroupLocations.size());
+                Location *sampledLocation = socialGroupLocations[sampledLocationIndex]; //store sampled pointer to location instance
+                bool alreadySampled = (find(whereWillIGo.begin(), whereWillIGo.end(), sampledLocation) != whereWillIGo.end());
+                if (alreadySampled) //if you visit sampledLocation already, sample again
+                    continue; //continue = skip the remaining code and move to the next iteration
+                whereWillIGo.emplace_back(sampledLocation);
+                placesVisited++;
+                break;
+            } else {
+                const auto sampledLocationIndex = gsl_rng_uniform_int(p_rng, p_locations->size());
+                Location *sampledLocation = &(*p_locations)[sampledLocationIndex]; //retrieves element "sampledLocationIndex" from the container pointed to
+                //by "p_locations" & storing the address of that element in the "sampledLocation" pointer
+                bool inSocialGroup = (find(socialGroupLocations.begin(), socialGroupLocations.end(), sampledLocation) != socialGroupLocations.end());
+                bool alreadySampled = (find(whereWillIGo.begin(), whereWillIGo.end(), sampledLocation) != whereWillIGo.end());
+                if (alreadySampled || inSocialGroup) //if you visit sampledLocation already, or sampledLocation is part of your social group
+                    continue; //continue = skip the remaining code and move to the next iteration
+                whereWillIGo.emplace_back(sampledLocation);
+                placesVisited++;
+                break;
+            }
+        } while (true); //evaluation at the beginning of the do/while loop.
+    }
+    
+    for (Location *location : whereWillIGo) //location = pointer to location instances
     {
-        const LocationID locationIndex = locationsVisited[i];
-        (*p_locations)[locationIndex].registerInfectiousVisits(*this); //register infectious visit
+        location->registerInfectiousVisits(*this); //register infectious visit
         
         if (infectionStatus_ == InfectionStatus::kSusceptible) //register potential exposure of susceptibles
         {
-            const int32_t infectiousVisits = (*p_locations)[locationIndex].infectedVisitsCountNTicksAgo(0);
-            const double diseaseEstablishment = (*p_locations)[locationIndex].riskScoreNTicksAgo(0);
+            const int32_t infectiousVisits = location->infectedVisitsCountNTicksAgo(0);
+            const double diseaseEstablishment = location->riskScoreNTicksAgo(0);
             
             for (int j = 0; j < infectiousVisits; j++)
             {
-                const double infectionProbability = gsl_ran_flat(p_rng, 0 , 1);
-                if (infectionProbability < diseaseEstablishment) initiateInfection(p_exposureDuration);
+                const double infectionProbability = gsl_rng_uniform(p_rng);
+                if (infectionProbability < diseaseEstablishment)
+                    initiateInfection(p_exposureDuration);
             }
         }
     }
@@ -176,6 +210,7 @@ std::ostream &print(std::ostream &p_os, const Human &p_human)
     p_os << p_human.homeLocation_.getLocationID() << " ";
     print(p_os, p_human.infectionStatus_) << " ";
     p_os << p_human.elapsedTicks_ << " ";
-    p_os << p_human.remainingTicks_ ;
+    p_os << p_human.remainingTicks_  << " ";
+    p_os << p_human.socialGroup_.getID();
     return p_os;
 }

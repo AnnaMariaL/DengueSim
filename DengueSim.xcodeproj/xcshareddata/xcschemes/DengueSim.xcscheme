@@ -58,7 +58,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-infectionDuration 3"
+            argument = "-infectionDuration 5"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -66,15 +66,19 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementShape 8.18"
+            argument = "-seasonalityPhaseShift 182.5"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-movementRate 3.55"
+            argument = "-avgNumberVisits 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 0.02"
+            argument = "-varNumberVisits 0.1"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-alpha 0.05"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		951BA1BB2A5C73E40082488C /* SocialGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 951BA1B92A5C73E40082488C /* SocialGroup.cpp */; };
 		9569AD1329A693B500122B73 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9569AD1229A693B500122B73 /* Accelerate.framework */; };
 		958C79F2290AD91400E06D57 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 958C79F1290AD91400E06D57 /* main.cpp */; };
 		958C79FC290AD95200E06D57 /* Location.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 958C79F8290AD95200E06D57 /* Location.cpp */; };
@@ -27,6 +28,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		951BA1B92A5C73E40082488C /* SocialGroup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SocialGroup.cpp; sourceTree = "<group>"; };
+		951BA1BC2A5C75A80082488C /* SocialGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SocialGroup.h; sourceTree = "<group>"; };
 		9569AD1229A693B500122B73 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		958C79EE290AD91400E06D57 /* DengueSim */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DengueSim; sourceTree = BUILT_PRODUCTS_DIR; };
 		958C79F1290AD91400E06D57 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -71,10 +74,12 @@
 			isa = PBXGroup;
 			children = (
 				958C79F1290AD91400E06D57 /* main.cpp */,
-				958C79FA290AD95200E06D57 /* Human.cpp */,
 				958C79F9290AD95200E06D57 /* Human.h */,
-				958C79F8290AD95200E06D57 /* Location.cpp */,
+				958C79FA290AD95200E06D57 /* Human.cpp */,
 				958C79FB290AD95200E06D57 /* Location.h */,
+				958C79F8290AD95200E06D57 /* Location.cpp */,
+				951BA1BC2A5C75A80082488C /* SocialGroup.h */,
+				951BA1B92A5C73E40082488C /* SocialGroup.cpp */,
 			);
 			path = DengueSim;
 			sourceTree = "<group>";
@@ -145,6 +150,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				951BA1BB2A5C73E40082488C /* SocialGroup.cpp in Sources */,
 				958C79FC290AD95200E06D57 /* Location.cpp in Sources */,
 				958C79F2290AD91400E06D57 /* main.cpp in Sources */,
 				958C79FD290AD95200E06D57 /* Human.cpp in Sources */,
