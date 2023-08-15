@@ -15,7 +15,7 @@ void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_hu
 {
     HumanID humanID = 0; //initialize human ID
     int32_t socialGroupCount = (int32_t)std::ceil((double)p_locations.size() / p_locationsPerSocialGroup); //determine social group count
-    
+    int32_t numberOfInhabitantsPerLocation;
     p_socialGroups->reserve(socialGroupCount);      // allocate the right size up front, so it doesn't move!
     
     for (SocialGroupID group_id = 0; group_id < socialGroupCount; group_id++)
@@ -35,9 +35,9 @@ void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_hu
                 
                 socialGroup.AddLocation(location);
                 
-                int32_t numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
-                if (numberOfInhabitantsPerLocation == 0) //at least one inhabitant per location
-                    numberOfInhabitantsPerLocation = 1; //redraw (do --> while)
+                do
+                    numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
+                while (numberOfInhabitantsPerLocation <= 0); //at least one inhabitant per location
                 
                 for (int32_t i = 0; i < numberOfInhabitantsPerLocation; i++)
                 {
@@ -125,9 +125,8 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
         
         if (infectionStatus_ == InfectionStatus::kSusceptible) //register potential exposure of susceptibles
         {
-            const int32_t infectiousVisits = location->infectedVisitsCountNTicksAgo(0);
-            const double diseaseEstablishment = location->riskScoreNTicksAgo(0);
-            
+            const int32_t infectiousVisits = location->infectedVisitsCountNTicksAgo(0); //number of invectious visits previous tick
+            const double diseaseEstablishment = location->getRecentRiskScore(); //disease establishment in current tick
             for (int j = 0; j < infectiousVisits; j++)
             {
                 const double infectionProbability = gsl_rng_uniform(p_rng);

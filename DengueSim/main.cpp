@@ -27,6 +27,8 @@ int main(int argc, const char * argv[])
     double argv_seasonalityPhaseShift = 0; //phase shift for seasonality
     double argv_avgNumberVisits = 4.00;
     double argv_varNumberVisits = 1.00;
+    double argv_proportionSocialVisits = 0.5;
+    
     std::string argv_outputFile = "foo.txt";
     
     for (int arg = 1; arg < argc; ++arg) //parse command line arguments
@@ -92,11 +94,11 @@ int main(int argc, const char * argv[])
             std::cout << "-seasonalityPhaseShift set to " << argv_seasonalityPhaseShift << std::endl;
         }
         
-        if(strcmp(argv[arg], "-avgNumberVisits") == 0) //average number of places visited, human movement (negative binomial distribution)
+        if(strcmp(argv[arg], "-avgNumberVisits") == 0) //average number of places visited, human movement (gamma distribution)
         {
             if (arg == argc - 1)
             {
-                std::cerr << "missing argument for -movementShape!";
+                std::cerr << "missing argument for -avgNumberVisits!";
                 exit(1);
             }
             argv_avgNumberVisits = std::stod(argv[arg+1]);
@@ -104,16 +106,28 @@ int main(int argc, const char * argv[])
             std::cout << "-avgNumberVisits set to " << argv_avgNumberVisits << std::endl;
         }
         
-        if(strcmp(argv[arg], "-varNumberVisits") == 0) //size parameter, human movement (negative binomial distribution)
+        if(strcmp(argv[arg], "-varNumberVisits") == 0) //variance in number of places visited, human movement (gamma distirbution)
         {
             if (arg == argc - 1)
             {
-                std::cerr << "missing argument for -movementRate!";
+                std::cerr << "missing argument for -varNumberVisits!";
                 exit(1);
             }
             argv_varNumberVisits = std::stod(argv[arg+1]);
             arg++;
             std::cout << "-varNumberVisits set to " << argv_varNumberVisits << std::endl;
+        }
+        
+        if(strcmp(argv[arg], "-proportionSocialVisits") == 0) //proportion of visits that occur inside the social Group
+        {
+            if (arg == argc - 1)
+            {
+                std::cerr << "missing argument for -proportionSocialVisits!";
+                exit(1);
+            }
+            argv_proportionSocialVisits = std::stod(argv[arg+1]);
+            arg++;
+            std::cout << "-proportionSocialVisits set to " << argv_proportionSocialVisits << std::endl;
         }
         
         if (strcmp(argv[arg], "-output") == 0) //output file
@@ -136,21 +150,21 @@ int main(int argc, const char * argv[])
     const double seasonalityPhaseshift = argv_seasonalityPhaseShift;
     const double avgNumberVisits = argv_avgNumberVisits;
     const double varNumberVisits = argv_varNumberVisits;
+    const double proportionSocialVisits = argv_proportionSocialVisits;
     const std::string outputFile = argv_outputFile;
     
     std::vector<Location> locations; //empty vector location
     std::vector<SocialGroup> socialGroups; //empty vector socialGroups
     std::vector<Human> humans; //empty vector humans
     
-    const int32_t locationCountToAdd = 10000; //total number of locations
+    const int32_t locationCountToAdd = 100; //total number of locations
     const unsigned int numberTicks = 365 * 10 ; //maximum number of simulated ticks
-    const size_t numberTicksToTrackInDeque = 10; //deque size for infectedVisitCount and riskScore
+    const size_t numberTicksToTrackInDeque = 10; //deque size for infectedVisitsCountsHistory_ and riskScoreHistory_ (Location classs members)
     const double humansPerLocationNegBinomProb = 0.5; //0.5939354, Reiner et al. (2014)
     const double humansPerLocationNegBinomN = 9; //9.01, Reiner et al. (2014)
     const unsigned int exposureDuration = 0; //infection parameters
     const double omega = 1; // 1/wavelength
-    const unsigned int locationsPerSocialGroup = 5;
-    const double proportionSocialVisits = 0; //proportion of visits that should occurr inside the social group
+    const unsigned int locationsPerSocialGroup = 10;
     const double startValueDiseaseEstablishment = diseaseEstablishment + seasonalityCoefficient * std::cos(omega * 2 * M_PI*(0 - seasonalityPhaseshift) / 365); //set disease Establishment proportion
     
     const gsl_rng_type *randomNumberType; //build random number generator (GSL library)
@@ -178,9 +192,8 @@ int main(int argc, const char * argv[])
     humans[infectionSeed].initiateInfection(exposureDuration);
     for (unsigned int currentTick=1; currentTick <= numberTicks; currentTick++)
     {//for each tick
-        std::cout << currentTick << std::endl;
+        //std::cout << currentTick << std::endl;
         const double currentDiseaseEstablishment = diseaseEstablishment +  seasonalityCoefficient * std::cos(omega * 2 * M_PI * (currentTick-seasonalityPhaseshift)/365); //calculate current disease establishment proportion
-        
         for (auto &human : humans)
             human.generateMovement(&locations, avgNumberVisits, varNumberVisits, exposureDuration, proportionSocialVisits, rng); //generate movement
         for (auto &location : locations)

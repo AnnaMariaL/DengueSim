@@ -54,15 +54,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-seed 42"
+            argument = "-seed 123"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-infectionDuration 5"
+            argument = "-infectionDuration 2.97"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alphaSeasonality 0"
+            argument = "-alphaSeasonality 0.01"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -70,15 +70,19 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-avgNumberVisits 1"
+            argument = "-avgNumberVisits 2"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-varNumberVisits 0.1"
+            argument = "-varNumberVisits 0.25"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-alpha 0.05"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-proportionSocialVisits 0.90"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
