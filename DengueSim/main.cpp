@@ -157,15 +157,16 @@ int main(int argc, const char * argv[])
     std::vector<SocialGroup> socialGroups; //empty vector socialGroups
     std::vector<Human> humans; //empty vector humans
     
-    const int32_t locationCountToAdd = 100; //total number of locations
-    const unsigned int numberTicks = 365 * 10 ; //maximum number of simulated ticks
+    const int32_t locationCountToAdd = 1; //total number of locations
+    const unsigned int numberTicks = 1000 ; //maximum number of simulated ticks
     const size_t numberTicksToTrackInDeque = 10; //deque size for infectedVisitsCountsHistory_ and riskScoreHistory_ (Location classs members)
     const double humansPerLocationNegBinomProb = 0.5; //0.5939354, Reiner et al. (2014)
-    const double humansPerLocationNegBinomN = 9; //9.01, Reiner et al. (2014)
+    const double humansPerLocationNegBinomN = 10000; //9.01, Reiner et al. (2014)
     const unsigned int exposureDuration = 0; //infection parameters
     const double omega = 1; // 1/wavelength
-    const unsigned int locationsPerSocialGroup = 10;
-    const double startValueDiseaseEstablishment = diseaseEstablishment + seasonalityCoefficient * std::cos(omega * 2 * M_PI*(0 - seasonalityPhaseshift) / 365); //set disease Establishment proportion
+    const unsigned int locationsPerSocialGroup = 1;
+    const double startValueDiseaseEstablishment = diseaseEstablishment * (1 + seasonalityCoefficient * std::cos(omega * 2 * M_PI*(0 - seasonalityPhaseshift))); //set disease Establishment proportion
+    std::cout << startValueDiseaseEstablishment << std::endl;
     
     const gsl_rng_type *randomNumberType; //build random number generator (GSL library)
     gsl_rng *rng;
@@ -192,8 +193,8 @@ int main(int argc, const char * argv[])
     humans[infectionSeed].initiateInfection(exposureDuration);
     for (unsigned int currentTick=1; currentTick <= numberTicks; currentTick++)
     {//for each tick
-        //std::cout << currentTick << std::endl;
-        const double currentDiseaseEstablishment = diseaseEstablishment +  seasonalityCoefficient * std::cos(omega * 2 * M_PI * (currentTick-seasonalityPhaseshift)/365); //calculate current disease establishment proportion
+        std::cout << currentTick << std::endl;
+        const double currentDiseaseEstablishment = diseaseEstablishment * (1 + seasonalityCoefficient * std::cos(omega * 2 * M_PI * ((double)currentTick/365-seasonalityPhaseshift))); //calculate current disease establishment proportion
         for (auto &human : humans)
             human.generateMovement(&locations, avgNumberVisits, varNumberVisits, exposureDuration, proportionSocialVisits, rng); //generate movement
         for (auto &location : locations)

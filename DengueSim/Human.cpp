@@ -17,7 +17,6 @@ void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_hu
     int32_t socialGroupCount = (int32_t)std::ceil((double)p_locations.size() / p_locationsPerSocialGroup); //determine social group count
     int32_t numberOfInhabitantsPerLocation;
     p_socialGroups->reserve(socialGroupCount);      // allocate the right size up front, so it doesn't move!
-    
     for (SocialGroupID group_id = 0; group_id < socialGroupCount; group_id++)
     {
         p_socialGroups->emplace_back(group_id); //add new social group to vector p_socialGroups
@@ -35,8 +34,9 @@ void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_hu
                 
                 socialGroup.AddLocation(location);
                 
-                do
+                do {
                     numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
+                }
                 while (numberOfInhabitantsPerLocation <= 0); //at least one inhabitant per location
                 
                 for (int32_t i = 0; i < numberOfInhabitantsPerLocation; i++)

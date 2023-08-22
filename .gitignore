@@ -44,7 +44,7 @@ Debug/
 # ignore output from DengueSim
 
 output.txt
-
+foo.txt
 
 #####
 # FROM HERE ON: ignore bits of Xcode that we don't want to commit
