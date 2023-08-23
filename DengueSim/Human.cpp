@@ -63,27 +63,19 @@ void Human::initiateInfection(const unsigned int p_exposureDuration)
     elapsedTicks_ = 0;
 }
 
-void Human::generateMovement(std::vector<Location> *p_locations, const double p_avgNumberVisits, const double p_varNumberVisits, const unsigned int p_exposureDuration, const double p_proportionSocialVisits, gsl_rng *p_rng)
+void Human::generateMovement(std::vector<Location> *p_locations, const double p_avgNumberVisits, const double p_pNumberVisits, const unsigned int p_exposureDuration, const double p_proportionSocialVisits, gsl_rng *p_rng)
 {
-    double randomMovementRate = p_avgNumberVisits/p_varNumberVisits;
-    double randomMovementShape = p_avgNumberVisits * p_avgNumberVisits / p_varNumberVisits;
-    double randomDrawNumberOfLocations = gsl_ran_gamma(p_rng, randomMovementShape, 1 / randomMovementRate);
-    const size_t numberOfLocationsVisited = (size_t)std::round(randomDrawNumberOfLocations);
+    double randomMovementN = p_avgNumberVisits * p_pNumberVisits / ( 1 - p_pNumberVisits);
+    const size_t numberOfLocationsVisited = gsl_ran_negative_binomial(p_rng, p_pNumberVisits, randomMovementN); //no error if randomMovementN = na/inf: numberOfLocationsVisited = 0;
     std::vector<Location *> socialGroupLocations = getSocialGroup().Locations(); //social group = a vector of pointers to location objects
 
-    if (numberOfLocationsVisited >= p_locations->size()) { //avoid endless loops if too few locations are present
-        std::cerr << "Too many locations for location buffer. Sampling terminated." << std::endl;
-        exit(1);
-    }
-    if ((numberOfLocationsVisited >= socialGroupLocations.size()) && (p_proportionSocialVisits >= 1.0)) { //avoid endless loop if too few locations in social group
-        std::cerr << "Too many locations for social group. Sampling terminated." << std::endl;
-        exit(1);
-    }
+    if (numberOfLocationsVisited >= p_locations->size()) //notify user
+        std::cerr << "For human " << getID() << " more visits (" << numberOfLocationsVisited << ") are scheduled than there are locations (" << p_locations->size() << ")." << std::endl;
     
     std::vector<Location *> whereWillIGo; //whereWillIGo = vector of pointers to location objects
     whereWillIGo.emplace_back(&getHomeLocation()); //always visit home; getHomeLocation() returns a reference, but we need the address of the home Location instance --> &getHomeLocation()
     
-    size_t placesVisited = 1;
+    size_t placesVisited = 0;
     
     while (placesVisited < numberOfLocationsVisited) {
         size_t trialCount = 0;
@@ -98,9 +90,6 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
             if (isSocialGroupVisit < p_proportionSocialVisits) { //social visit
                 const auto sampledLocationIndex = gsl_rng_uniform_int(p_rng, socialGroupLocations.size());
                 Location *sampledLocation = socialGroupLocations[sampledLocationIndex]; //store sampled pointer to location instance
-                bool alreadySampled = (find(whereWillIGo.begin(), whereWillIGo.end(), sampledLocation) != whereWillIGo.end());
-                if (alreadySampled) //if you visit sampledLocation already, sample again
-                    continue; //continue = skip the remaining code and move to the next iteration
                 whereWillIGo.emplace_back(sampledLocation);
                 placesVisited++;
                 break;
@@ -109,8 +98,7 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
                 Location *sampledLocation = &(*p_locations)[sampledLocationIndex]; //retrieves element "sampledLocationIndex" from the container pointed to
                 //by "p_locations" & storing the address of that element in the "sampledLocation" pointer
                 bool inSocialGroup = (find(socialGroupLocations.begin(), socialGroupLocations.end(), sampledLocation) != socialGroupLocations.end());
-                bool alreadySampled = (find(whereWillIGo.begin(), whereWillIGo.end(), sampledLocation) != whereWillIGo.end());
-                if (alreadySampled || inSocialGroup) //if you visit sampledLocation already, or sampledLocation is part of your social group
+                if (inSocialGroup) //if sampledLocation is part of your social group
                     continue; //continue = skip the remaining code and move to the next iteration
                 whereWillIGo.emplace_back(sampledLocation);
                 placesVisited++;
@@ -130,8 +118,10 @@ void Human::generateMovement(std::vector<Location> *p_locations, const double p_
             for (int j = 0; j < infectiousVisits; j++)
             {
                 const double infectionProbability = gsl_rng_uniform(p_rng);
-                if (infectionProbability < diseaseEstablishment)
+                if (infectionProbability < diseaseEstablishment) {
                     initiateInfection(p_exposureDuration);
+                    break;
+                }
             }
         }
     }
