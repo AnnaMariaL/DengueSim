@@ -28,6 +28,8 @@ int main(int argc, const char * argv[])
     double argv_avgNumberVisits = 4.00; //average number of places visited, human movement (negative binomial distribution)
     double argv_pNumberVisits = 0.5; //success probability for places visited, human movement (negative binomial distribution)
     double argv_proportionSocialVisits = 0.5; //proportion of visits that occur inside the social Group
+    double argv_locationsPerSocialGroup = 4.5; //average number of locations per social group
+    int32_t argv_locationCountToAdd = 1000; //total number of locations
     
     std::string argv_outputFile = "foo.txt";
     
@@ -130,6 +132,30 @@ int main(int argc, const char * argv[])
             std::cout << "-proportionSocialVisits set to " << argv_proportionSocialVisits << std::endl;
         }
         
+        if(strcmp(argv[arg], "-locationsPerSocialGroup") == 0) //average number of locations per social Group
+        {
+            if (arg == argc - 1)
+            {
+                std::cerr << "missing argument for -locationsPerSocialGroup!";
+                exit(1);
+            }
+            argv_locationsPerSocialGroup = std::stod(argv[arg+1]);
+            arg++;
+            std::cout << "-locationsPerSocialGroup set to " << argv_locationsPerSocialGroup << std::endl;
+        }
+        
+        if(strcmp(argv[arg], "-locationCount") == 0) //average number of locations per social Group
+        {
+            if (arg == argc - 1)
+            {
+                std::cerr << "missing argument for -locationCount!";
+                exit(1);
+            }
+            argv_locationCountToAdd = std::stoi(argv[arg+1]);
+            arg++;
+            std::cout << "-locationCount set to " << argv_locationCountToAdd << std::endl;
+        }
+        
         if (strcmp(argv[arg], "-output") == 0) //output file
         {
             if (arg == argc - 1)
@@ -151,20 +177,20 @@ int main(int argc, const char * argv[])
     const double avgNumberVisits = argv_avgNumberVisits;
     const double pNumberVisits = argv_pNumberVisits;
     const double proportionSocialVisits = argv_proportionSocialVisits;
+    const double locationsPerSocialGroup = argv_locationsPerSocialGroup;
+    const int32_t locationCountToAdd = argv_locationCountToAdd;
     const std::string outputFile = argv_outputFile;
     
     std::vector<Location> locations; //empty vector location
     std::vector<SocialGroup> socialGroups; //empty vector socialGroups
     std::vector<Human> humans; //empty vector humans
     
-    const int32_t locationCountToAdd = 10000; //total number of locations
-    const unsigned int numberTicks = 1000 ; //maximum number of simulated ticks
+    const unsigned int numberTicks = 3650 ; //maximum number of simulated ticks
     const size_t numberTicksToTrackInDeque = 10; //deque size for infectedVisitsCountsHistory_ and riskScoreHistory_ (Location classs members)
     const double humansPerLocationNegBinomProb = 0.5939354; //0.5939354, Reiner et al. (2014)
     const double humansPerLocationNegBinomN = 9.01 ; //9.01, Reiner et al. (2014)
     const unsigned int exposureDuration = 0; //infection parameters
     const double omega = 1; // 1/wavelength
-    const unsigned int locationsPerSocialGroup = 10;
     const double startValueDiseaseEstablishment = diseaseEstablishment * (1 + seasonalityCoefficient * std::cos(omega * 2 * M_PI*(0 - seasonalityPhaseshift))); //set disease Establishment proportion
     
     const gsl_rng_type *randomNumberType; //build random number generator (GSL library)
@@ -188,8 +214,21 @@ int main(int argc, const char * argv[])
     generateHumans(locations, &humans, humansPerLocationNegBinomProb, humansPerLocationNegBinomN, rng, locationsPerSocialGroup, &socialGroups); //set up humans, # of humans per location ~ nbinom
     //social groups - a property of humans - are set up inside generateHumans()
     
+    int locationCount = 0; //check social Group assignment
+    for (SocialGroupID id = 0; id < socialGroups.size(); id++)
+    {
+        SocialGroup &socialGroup = (socialGroups)[id];
+        locationCount += socialGroup.Locations().size();
+    }
+    
+    if (locationCount != locations.size()) {
+        std::cerr << "Error in assignment of social groups. Not all locations are uniquely assigned." << std::endl;
+        exit(1);
+    }
+    
     const auto infectionSeed = gsl_rng_uniform_int(rng, humans.size()); //seed infection via an exposed individual
     humans[infectionSeed].initiateInfection(exposureDuration);
+    
     for (unsigned int currentTick=1; currentTick <= numberTicks; currentTick++)
     {//for each tick
         //std::cout << currentTick << std::endl;

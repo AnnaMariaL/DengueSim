@@ -54,7 +54,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-seed 42"
+            argument = "-seed 123"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -74,7 +74,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-pNumberVisits 0.001"
+            argument = "-pNumberVisits 0.5"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -83,6 +83,14 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-proportionSocialVisits 0.5"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-locationsPerSocialGroup 5"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-locationCount 5000"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

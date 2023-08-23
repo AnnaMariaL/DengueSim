@@ -32,7 +32,7 @@ typedef int32_t HumanID;
 extern std::ostream &print(std::ostream &p_os, const InfectionStatus p_status);
 extern std::ostream &print(std::ostream &p_os, const Human &p_human);
 
-extern void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng, unsigned int p_locationsPerSocialGroup, std::vector<SocialGroup> *p_socialGroups);
+extern void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng, const double p_locationsPerSocialGroup, std::vector<SocialGroup> *p_socialGroups);
 
 class Human {
 friend std::ostream &print(std::ostream &p_os, const Human &p_human);

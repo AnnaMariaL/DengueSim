@@ -11,29 +11,38 @@
 #include "Location.h"
 #include "SocialGroup.h"
 
-void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng, unsigned int p_locationsPerSocialGroup, std::vector<SocialGroup> *p_socialGroups)
+void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_humans, const double p_humansPerLocationNegBinomProb, const double p_humansPerLocationNegBinomN, gsl_rng *p_rng, const double p_locationsPerSocialGroup, std::vector<SocialGroup> *p_socialGroups)
 {
     HumanID humanID = 0; //initialize human ID
-    int32_t socialGroupCount = (int32_t)std::ceil((double)p_locations.size() / p_locationsPerSocialGroup); //determine social group count
+    SocialGroupID group_id = 0; //initialize Social Group ID
+    LocationID location_index = 0; //initialize Location Index
+    
     int32_t numberOfInhabitantsPerLocation;
-    p_socialGroups->reserve(socialGroupCount);      // allocate the right size up front, so it doesn't move!
-    for (SocialGroupID group_id = 0; group_id < socialGroupCount; group_id++)
-    {
+    
+    double p = p_locationsPerSocialGroup - floor(p_locationsPerSocialGroup); //set up RNG for number of locations per social group
+    double probabilities[] = {1 - p, p};
+    gsl_ran_discrete_t* distSocialGroup = gsl_ran_discrete_preproc(2, probabilities);
+    
+    p_socialGroups->reserve((int32_t)p_locations.size()); // allocate sufficient size up front, so it doesn't move!
+    
+    do {
+        if (location_index == p_locations.size()) //stop if all locations were already assigned
+            break;
+        
         p_socialGroups->emplace_back(group_id); //add new social group to vector p_socialGroups
         SocialGroup &socialGroup = p_socialGroups->back(); //retrieve current social group
+        auto socialGroupSize = floor(p_locationsPerSocialGroup) + gsl_ran_discrete(p_rng, distSocialGroup); //sample size of social group
         
-        //std::cout << "new sociaslgroup with id " << group_id << ": " << socialGroup.getID() << " (" << (&socialGroup) << ")" << std::endl;
-        
-        for (int32_t j = 0; j < p_locationsPerSocialGroup; j++) //add p_locationsPerSocialGroup to current social group
+        //std::cout << "new social group with id " << group_id << ": " << socialGroup.getID() << " (" << (&socialGroup) << ")" << std::endl;
+
+        for (int32_t j = 0; j < socialGroupSize; j++) //add p_locationsPerSocialGroup to current social group
         {
-            size_t location_index = group_id * p_locationsPerSocialGroup + j;
-            
             if (location_index < p_locations.size()) //avoid index out of bounds
             {
                 Location &location = p_locations[location_index];
                 
                 socialGroup.AddLocation(location);
-                
+                location_index++; //increment location index
                 do {
                     numberOfInhabitantsPerLocation = gsl_ran_negative_binomial(p_rng, p_humansPerLocationNegBinomProb, p_humansPerLocationNegBinomN);
                 }
@@ -46,14 +55,20 @@ void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_hu
                 }
             }
         }
-    }
+        
+        group_id++; //increment social Group id
+    } while (true);
+    
+    gsl_ran_discrete_free(distSocialGroup);
     
     // DEBUG
-    //for (SocialGroupID group_id = 0; group_id < socialGroupCount; group_id++)
+    //for (SocialGroupID id = 0; id < p_socialGroups->size(); id++)
     //{
-      //  SocialGroup &socialGroup = (*p_socialGroups)[group_id];
-       // std::cout << "post-init: " << socialGroup.getID() << " (" << &socialGroup << ")" << std::endl;
-   // }
+       // SocialGroup &socialGroup = (*p_socialGroups)[id];
+       // std::cout << socialGroup.Locations().size() << std::endl;
+        //std::cout << "post-init: " << socialGroup.getID() << " (" << &socialGroup << ")" << socialGroup.Locations().size() << std::endl;
+    //}
+    
 }
 
 void Human::initiateInfection(const unsigned int p_exposureDuration)
