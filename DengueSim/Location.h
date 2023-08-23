@@ -15,6 +15,7 @@
 
 class Human;
 class Location;
+class SocialGroup;
 
 typedef int32_t LocationID;
 

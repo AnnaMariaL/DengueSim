@@ -9,11 +9,13 @@
 #define SOCIALGROUP_H
 
 #include <vector>
-typedef int32_t SocialGroupID;
+#include <stdio.h>
 
 class Human;
 class Location;
 class SocialGroup;
+
+typedef int32_t SocialGroupID;
 
 class SocialGroup {
 public:
