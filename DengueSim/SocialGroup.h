@@ -9,7 +9,7 @@
 #define SOCIALGROUP_H
 
 #include <vector>
-#include <stdio.h>
+#include <cstdint>
 
 class Human;
 class Location;
