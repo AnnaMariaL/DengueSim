@@ -214,8 +214,8 @@ int main(int argc, const char * argv[])
     generateHumans(locations, &humans, humansPerLocationNegBinomProb, humansPerLocationNegBinomN, rng, locationsPerSocialGroup, &socialGroups); //set up humans, # of humans per location ~ nbinom
     //social groups - a property of humans - are set up inside generateHumans()
     
-    int locationCount = 0; //check social Group assignment
-    for (SocialGroupID id = 0; id < socialGroups.size(); id++)
+    size_t locationCount = 0; //check social Group assignment
+    for (size_t id = 0; id < socialGroups.size(); id++)
     {
         SocialGroup &socialGroup = (socialGroups)[id];
         locationCount += socialGroup.Locations().size();
