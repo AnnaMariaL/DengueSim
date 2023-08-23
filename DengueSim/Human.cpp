@@ -15,7 +15,7 @@ void generateHumans(std::vector<Location> &p_locations, std::vector<Human> *p_hu
 {
     HumanID humanID = 0; //initialize human ID
     SocialGroupID group_id = 0; //initialize Social Group ID
-    LocationID location_index = 0; //initialize Location Index
+    size_t location_index = 0; //initialize Location Index
     
     int32_t numberOfInhabitantsPerLocation;
     
