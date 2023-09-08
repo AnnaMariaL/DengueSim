@@ -30,7 +30,7 @@ int main(int argc, const char * argv[])
     double argv_proportionSocialVisits = 0.5; //proportion of visits that occur inside the social Group
     double argv_locationsPerSocialGroup = 4.5; //average number of locations per social group
     int32_t argv_locationCountToAdd = 1000; //total number of locations
-    
+    std::string argv_releaseScenario = "H1"; //inital seeding scenario of the disease: H1; Hn; L1
     std::string argv_outputFile = "foo.txt";
     
     for (int arg = 1; arg < argc; ++arg) //parse command line arguments
@@ -167,6 +167,18 @@ int main(int argc, const char * argv[])
             arg++;
             std::cout << "-output set to " << argv_outputFile << std::endl;
         }
+        
+        if (strcmp(argv[arg], "-releaseScenario") == 0) //initial release scenario of the disease
+        { // H1 = 1 random human; Hn = n random humans (sampled from NBD); L1 = 1 random location (all inhabitants become exposed)
+            if (arg == argc - 1)
+            {
+                std::cerr << "missing argument for -releaseScenario!";
+                exit(1);
+            }
+            argv_releaseScenario = argv[arg+1];
+            arg++;
+            std::cout << "-releaseScenario set to " << argv_releaseScenario << std::endl;
+        }
     }
     
     const long int randomSeed = argv_randomSeed; //variables from argument parser
@@ -179,6 +191,7 @@ int main(int argc, const char * argv[])
     const double proportionSocialVisits = argv_proportionSocialVisits;
     const double locationsPerSocialGroup = argv_locationsPerSocialGroup;
     const int32_t locationCountToAdd = argv_locationCountToAdd;
+    const std::string releaseScenario = argv_releaseScenario;
     const std::string outputFile = argv_outputFile;
     
     std::vector<Location> locations; //empty vector location
@@ -226,8 +239,50 @@ int main(int argc, const char * argv[])
         exit(1);
     }
     
-    const auto infectionSeed = gsl_rng_uniform_int(rng, humans.size()); //seed infection via an exposed individual
-    humans[infectionSeed].initiateInfection(exposureDuration);
+    //initial release of disease
+    
+    if ( releaseScenario == "H1") { //seed infection in single individual
+        
+        const auto infectionSeed = gsl_rng_uniform_int(rng, humans.size());
+        humans[infectionSeed].initiateInfection(exposureDuration);
+        
+    } else {
+        if ( releaseScenario == "Hn" ) { //seed infection in multiple, randomly selected individuals
+            
+            std::vector<size_t> initialInfections; //book-keeping of already sampled humans
+            int32_t exposedCounter = 0; //counter
+            int32_t initialExposedCount = 0;
+            
+            do
+                initialExposedCount = gsl_ran_negative_binomial(rng, humansPerLocationNegBinomProb, humansPerLocationNegBinomN);
+            while (initialExposedCount < 1);
+            
+            while (exposedCounter < initialExposedCount) {
+                const auto infectionSeed = gsl_rng_uniform_int(rng, humans.size());
+                bool alreadySampled = (find(initialInfections.begin(), initialInfections.end(), infectionSeed) != initialInfections.end());
+                if (alreadySampled) //resample if human is already exposed
+                    continue;
+                humans[infectionSeed].initiateInfection(exposureDuration); //initiate infection
+                initialInfections.push_back(infectionSeed);
+                exposedCounter++; //increase counter
+            }
+            
+        } else {
+            if ( releaseScenario == "L1" ) { //seed infection in all inhabitants of one randomly selected location
+                
+                const auto infectionSeed = gsl_rng_uniform_int(rng, locations.size());
+                
+                for (auto &human : humans) {
+                    if ( human.getHomeLocation().getLocationID() == locations[infectionSeed].getLocationID() )
+                        human.initiateInfection(exposureDuration);
+                }
+            } else {
+                std::cerr << "Unknown release scenario. Select either \'H1\', \'Hn\', or \'L1\'." << std::endl;
+                exit(1);
+            }
+        }
+    }
+    
     
     for (unsigned int currentTick=1; currentTick <= numberTicks; currentTick++)
     {//for each tick

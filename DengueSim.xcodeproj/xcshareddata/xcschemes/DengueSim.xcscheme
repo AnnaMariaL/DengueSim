@@ -54,11 +54,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-seed 12"
+            argument = "-seed 4"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-infectionDuration 5"
+            argument = "-infectionDuration 4"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -86,11 +86,15 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-locationsPerSocialGroup 1"
+            argument = "-locationsPerSocialGroup 10"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-locationCount 5000"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-releaseScenario L1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
