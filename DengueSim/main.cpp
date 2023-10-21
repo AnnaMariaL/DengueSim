@@ -31,7 +31,8 @@ int main(int argc, const char * argv[])
     double argv_locationsPerSocialGroup = 4.5; //average number of locations per social group
     int32_t argv_locationCountToAdd = 1000; //total number of locations
     std::string argv_releaseScenario = "H1"; //inital seeding scenario of the disease: H1; Hn; L1
-    std::string argv_outputFile = "foo.txt";
+    std::string argv_outputFile = "foo.txt"; //output file for S-E-I-R counts per tick
+    std::string argv_verbose = "true"; //if true, print parameters to std::cout
     
     for (int arg = 1; arg < argc; ++arg) //parse command line arguments
     {
@@ -45,7 +46,6 @@ int main(int argc, const char * argv[])
             }
             argv_randomSeed = std::stol(argv[arg+1]);
             arg++;
-            //std::cout << "-seed set to " << argv_randomSeed << std::endl;
         }
         
         if (strcmp(argv[arg], "-infectionDuration") == 0) //minimum duration of infectious period
@@ -57,7 +57,6 @@ int main(int argc, const char * argv[])
             }
             argv_infectionDuration = std::stof(argv[arg+1]);
             arg++;
-            //std::cout << "-infectionDuration set to " << argv_infectionDuration << std::endl;
         }
         
         if (strcmp(argv[arg], "-alpha") == 0) //baseline disease establishment proportion
@@ -69,7 +68,6 @@ int main(int argc, const char * argv[])
             }
             argv_diseaseEstablishment = std::stof(argv[arg+1]);
             arg++;
-            //std::cout << "-alpha set to " << argv_diseaseEstablishment << std::endl;
         }
         
         if (strcmp(argv[arg], "-alphaSeasonality") == 0) //strength of seasonality
@@ -81,7 +79,6 @@ int main(int argc, const char * argv[])
             }
             argv_seasonalityCoefficient = std::stof(argv[arg+1]);
             arg++;
-            //std::cout << "-alphaSeasonality set to " << argv_seasonalityCoefficient << std::endl;
         }
         
         if (strcmp(argv[arg], "-seasonalityPhaseShift") == 0) //phase shift for seasonlity
@@ -93,7 +90,6 @@ int main(int argc, const char * argv[])
             }
             argv_seasonalityPhaseShift = std::stof(argv[arg+1]);
             arg++;
-            //std::cout << "-seasonalityPhaseShift set to " << argv_seasonalityPhaseShift << std::endl;
         }
         
         if(strcmp(argv[arg], "-avgNumberVisits") == 0) //average number of places visited, human movement (negative binomial distribution)
@@ -105,7 +101,6 @@ int main(int argc, const char * argv[])
             }
             argv_avgNumberVisits = std::stod(argv[arg+1]);
             arg++;
-            //std::cout << "-avgNumberVisits set to " << argv_avgNumberVisits << std::endl;
         }
         
         if(strcmp(argv[arg], "-pNumberVisits") == 0) //success probability for places visited, human movement (negative binomial distribution)
@@ -117,7 +112,6 @@ int main(int argc, const char * argv[])
             }
             argv_pNumberVisits = std::stod(argv[arg+1]);
             arg++;
-            //std::cout << "-pNumberVisits set to " << argv_pNumberVisits << std::endl;
         }
         
         if(strcmp(argv[arg], "-proportionSocialVisits") == 0) //proportion of visits that occur inside the social Group
@@ -129,7 +123,6 @@ int main(int argc, const char * argv[])
             }
             argv_proportionSocialVisits = std::stod(argv[arg+1]);
             arg++;
-            //std::cout << "-proportionSocialVisits set to " << argv_proportionSocialVisits << std::endl;
         }
         
         if(strcmp(argv[arg], "-locationsPerSocialGroup") == 0) //average number of locations per social Group
@@ -141,7 +134,6 @@ int main(int argc, const char * argv[])
             }
             argv_locationsPerSocialGroup = std::stod(argv[arg+1]);
             arg++;
-            //std::cout << "-locationsPerSocialGroup set to " << argv_locationsPerSocialGroup << std::endl;
         }
         
         if(strcmp(argv[arg], "-locationCount") == 0) //average number of locations per social Group
@@ -153,7 +145,6 @@ int main(int argc, const char * argv[])
             }
             argv_locationCountToAdd = std::stoi(argv[arg+1]);
             arg++;
-            //std::cout << "-locationCount set to " << argv_locationCountToAdd << std::endl;
         }
         
         if (strcmp(argv[arg], "-output") == 0) //output file
@@ -165,7 +156,6 @@ int main(int argc, const char * argv[])
             }
             argv_outputFile = argv[arg+1];
             arg++;
-            //std::cout << "-output set to " << argv_outputFile << std::endl;
         }
         
         if (strcmp(argv[arg], "-releaseScenario") == 0) //initial release scenario of the disease
@@ -177,8 +167,19 @@ int main(int argc, const char * argv[])
             }
             argv_releaseScenario = argv[arg+1];
             arg++;
-            //std::cout << "-releaseScenario set to " << argv_releaseScenario << std::endl;
         }
+        
+        if (strcmp(argv[arg], "-verbose") == 0) //if true, prints set parameters to std::cout
+        {
+            if (arg == argc - 1)
+            {
+                std::cerr << "missing argument for -verbose!";
+                exit(1);
+            }
+            argv_verbose = argv[arg+1];
+            arg++;
+        }
+        
     }
     
     const long int randomSeed = argv_randomSeed; //variables from argument parser
@@ -193,6 +194,23 @@ int main(int argc, const char * argv[])
     const int32_t locationCountToAdd = argv_locationCountToAdd;
     const std::string releaseScenario = argv_releaseScenario;
     const std::string outputFile = argv_outputFile;
+    const std::string verbose = argv_verbose;
+    
+    if (verbose == "true") { //if set to true, print parameters to std::cout
+        std::cout << "-seed: " << randomSeed << std::endl;
+        std::cout << "-alpha: " << diseaseEstablishment << std::endl;
+        std::cout << "-alphaSeasonality: " << argv_seasonalityCoefficient << std::endl;
+        std::cout << "-seasonalityPhaseShift: " << argv_seasonalityPhaseShift << std::endl;
+        std::cout << "-infectionDuration: " << infectionDuration << std::endl;
+        std::cout << "-avgNumberVisits: " << avgNumberVisits << std::endl;
+        std::cout << "-pNumberVisits: " << pNumberVisits << std::endl;
+        std::cout << "-proportionSocialVisits: " << proportionSocialVisits << std::endl;
+        std::cout << "-locationsPerSocialGroup: " << locationsPerSocialGroup << std::endl;
+        std::cout << "-locationCount: " << locationCountToAdd << std::endl;
+        std::cout << "-releaseScenario: " << releaseScenario << std::endl;
+        std::cout << "-output: " << outputFile << std::endl;
+        system("pwd");
+    }
     
     std::vector<Location> locations; //empty vector location
     std::vector<SocialGroup> socialGroups; //empty vector socialGroups
@@ -221,7 +239,6 @@ int main(int argc, const char * argv[])
         return -1;
      }
     
-    //system("pwd");
     
     generateLocations(locationCountToAdd, &locations, startValueDiseaseEstablishment, numberTicksToTrackInDeque); //set up locations (use pointer to avoid copying)
     generateHumans(locations, &humans, humansPerLocationNegBinomProb, humansPerLocationNegBinomN, rng, locationsPerSocialGroup, &socialGroups); //set up humans, # of humans per location ~ nbinom
@@ -286,7 +303,6 @@ int main(int argc, const char * argv[])
     
     for (unsigned int currentTick=1; currentTick <= numberTicks; currentTick++)
     {//for each tick
-        //std::cout << currentTick << std::endl;
         const double currentDiseaseEstablishment = diseaseEstablishment * (1 + seasonalityCoefficient * std::cos(omega * 2 * M_PI * ((double)currentTick/365-seasonalityPhaseshift))); //calculate current disease establishment proportion
         for (auto &human : humans)
             human.generateMovement(&locations, avgNumberVisits, pNumberVisits, exposureDuration, proportionSocialVisits, rng); //generate movement

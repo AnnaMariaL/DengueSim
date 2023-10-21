@@ -54,19 +54,23 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-seed 4"
+            argument = "-seed 3570470"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-infectionDuration 4"
+            argument = "-verbose false"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alphaSeasonality 0"
+            argument = "-infectionDuration 5.4033"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-seasonalityPhaseShift 0"
+            argument = "-alphaSeasonality 0.70185"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-seasonalityPhaseShift 0.22395"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -74,27 +78,27 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-pNumberVisits 0.9"
+            argument = "-pNumberVisits 0.95315"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-alpha 0.01"
+            argument = "-alpha 0.223837"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-proportionSocialVisits 0"
+            argument = "-proportionSocialVisits 0.87935"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-locationsPerSocialGroup 10"
+            argument = "-locationsPerSocialGroup 9"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-locationCount 5000"
+            argument = "-locationCount 10000"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-releaseScenario L1"
+            argument = "-releaseScenario H1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
