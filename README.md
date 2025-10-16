@@ -139,10 +139,6 @@ Each row corresponds to a simulation day (or tick), with columns representing co
 
 **Note**: Unless specified otherwise (by changing the variable `exposureDuration` in `main.cpp`), exposed individuals become infectious at the end of each day, effectively reducing the model to a Susceptible-Infectious-Recovered model, where the length of the infectious period is specified by the user.
 
-Absolutely! Here’s the **Command-Line Arguments** section updated so that the full explanation of `releaseScenario` is entirely within the **Description** column:
-
----
-
 ##  Command-Line Arguments
 
 The IBM can be customized using the command-line arguments listed below. Many parameters have been renamed in the manuscript for clarity. 
@@ -162,6 +158,3 @@ The IBM can be customized using the command-line arguments listed below. Many pa
 | `-output`                  | Name of the output file where simulation results are written                                                                                                                                                                                                                                                                    | –                     |
 | `-seed`                    | Random number seed controlling the stochasticity for reproducibility                                                                                                                                                                                                                                                            | –                     |
 **Note**: All parameters are optional. If omitted, the IBM uses default values (see the “Running the Simulation” section).
-
-
-
