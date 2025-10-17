@@ -1,8 +1,8 @@
 # DengueSim
 
-**DengueSim** is an **individual-based model (IBM)** designed to simulate disease dynamics.
-It is very loosely inspired by dengue and incorporates some key features shaping dengue epidemics, such as social structure, human movement, and seasonality. 
-It was developed for  the study "*Gaussian Process emulation for exploring complex individual-based epidemic models*", which is currently available as preprint: 
+**DengueSim** is a C++ **individual-based model (IBM)** designed to simulate disease dynamics.
+It is loosely inspired by dengue and incorporates some key features shaping dengue epidemics, such as social structure, human movement, and seasonality. 
+It was developed for  the study "*Gaussian Process emulation for exploring complex individual-based epidemic models*", which is currently available as a preprint: 
 
 [medRxiv, 2024.11.28.24318136v2](https://www.medrxiv.org/content/10.1101/2024.11.28.24318136v2)
 
@@ -17,20 +17,18 @@ This repository contains the full source code for **DengueSim**:
   - `main.cpp` driver 
 - build and compilation infrastructure (`CMakeLists.txt`)  
 
-The repository also includes `.xcodeproj` files that allow opening and building the project in **Xcode**.
-These `.xcodeproj` files were **only used during development** for convenience. They are **not required** to compile or run DengueSim.
-The recommended cross-platform method is to use **CMake**, which is compatible with macOS, Linux, and Windows.
 
 ### Conceptual overview of the IBM
 
 DengueSim simulates the spread of a disease with lasting immunity in a human population. 
-A detailed IBM description, motivated by the Overview, Design concepts, and Details (ODD) protocol for describing IMBs (Grimm *et al.* 2006), can be found in the [preprint](https://www.medrxiv.org/content/10.1101/2024.11.28.24318136v2).
+A detailed IBM description can be found in the [preprint](https://www.medrxiv.org/content/10.1101/2024.11.28.24318136v2).
+
 In brief: 
 
 - DengueSim simulates **individuals (humans)** that move among **locations**
 - **locations** belong to **social groups**; the clustering into **social groups** influences individual movement patterns
-- transmission and movement events are probabilistic, using GSL random number generators 
-- the IBM allows for exploration of how seasonality, human movement, and social structure shape population-level epidemic dynamics.
+- transmission and movement events are probabilistic, using random number generation provided by the GNU Scientific Library (GSL)
+- the IBM allows for exploration of how seasonality, human movement, and social structure shape population-level epidemic dynamics
   
 ---
 
@@ -84,23 +82,26 @@ target_include_directories(${TARGET_NAME} PRIVATE
 )
  ```
 This approach ensures that CMake searches common system locations, Homebrew symlinks, and local installations. 
-You may need to **adjust these paths** to match where GSL is installed on your machine.
+You may need to **adjust these paths** to match where the GSL is installed on your machine.
 
 4. **Compile the executable:**
+
+You can now compile the model using `make`.
+The optional `-j` flag specifies how many CPU cores to use during compilation — for example:
 
 ```bash
 make -j10
 ```
 
-This will produce `build/denguesim`. 
+This will run the build using 10 threads in parallel and will produce `build/denguesim`. 
+Feel free to adjust the number (e.g., `-j4`, `-j8`, etc.) based on how many cores your machine has.
 
 ## Running the simulation
 
 Once you have compiled `denguesim`, you can run it.
+**Note:** A full explanation of all command-line arguments is provided in the next section.
 
 If no command-line parameters are provided, the IBM uses the following **default values**:
-
-**Note:** A full explanation of all command-line arguments is provided in the next section.
 
 ```text
 -seed: 42
@@ -159,4 +160,4 @@ The IBM can be customized using the command-line arguments listed below. Many pa
 | `-seed`                    | Random number seed controlling the stochasticity for reproducibility                                                                                                                                                                                                                                                            | –                     ||
 
 
-**Note**: All parameters are optional. If omitted, the IBM uses default values (see the “Running the Simulation” section).
+**Note**: All parameters are optional. If omitted, the IBM uses default values (see the “Running the simulation” section).
